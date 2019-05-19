@@ -5,6 +5,16 @@ export default {
     fetchTables() {
         return axios.get("/table")
     },
+    createTables(doc) {
+        return axios.post("/table", doc)
+    },
+    editTable(doc) {
+        return axios.put("/table", doc)
+    },
+    deleteTable(doc) {
+        return axios.delete("/table", doc)
+    },
+
     fetchTableAreas() {
         return axios.get("/tableArea")
     },
