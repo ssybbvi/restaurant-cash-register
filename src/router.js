@@ -33,11 +33,6 @@ const router = new Router({
           component: () => import('./views/products/Index.vue'),
           name: 'products'
         },
-        {
-          path: '/setting/tableList',
-          name: 'setting-table-list',
-          component: () => import('./views/setting/TableList.vue'),
-        },
       ]
     },
     {
@@ -48,6 +43,27 @@ const router = new Router({
       // which is lazy-loaded when the route is visited.
       component: () => import( /* webpackChunkName: "about" */ './views/About.vue')
     },
+    {
+      path: '/setting',
+      name: 'setting',
+      component: Layout,
+      children: [{
+          path: '/setting/home',
+          name: 'setting-home',
+          component: () => import('./views/setting/Home.vue'),
+        },
+        {
+          path: '/setting/table-list',
+          name: 'setting-table-list',
+          component: () => import('./views/setting/TableList.vue'),
+        },
+        {
+          path: '/setting/product-list',
+          name: 'setting-product-list',
+          component: () => import('./views/setting/ProductList.vue'),
+        }
+      ]
+    }
 
 
 

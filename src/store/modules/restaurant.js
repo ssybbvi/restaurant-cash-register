@@ -131,10 +131,10 @@ const actions = {
             commit(types.FETCH_ERROR, reject)
         })
     },
-    fetchProducts({
+    fetchProduct({
         commit
     }) {
-        restaurantApi.fetchProducts().then(resolve => {
+        restaurantApi.fetchProduct().then(resolve => {
             commit(types.FETCH_PRODUCTS, resolve.data.data)
         }).catch(reject => {
             commit(types.FETCH_ERROR, reject)
@@ -148,7 +148,13 @@ const actions = {
         }).catch(reject => {
             commit(types.FETCH_ERROR, reject)
         })
-    }
+    },
+
+
+
+
+
+
 }
 
 const getters = {

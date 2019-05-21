@@ -27,9 +27,21 @@ export default {
         })
     },
 
-    fetchProducts() {
+    fetchProduct() {
         return axios.get("/product")
     },
+    createProduct(doc) {
+        return axios.post("/product", doc)
+    },
+    editProduct(doc) {
+        return axios.put("/product", doc)
+    },
+    deleteProduct(doc) {
+        return axios.delete("/product", doc)
+    },
+
+
+
     fetchProductMenus() {
         return axios.get("/productMenu")
     },

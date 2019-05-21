@@ -9,23 +9,23 @@
     </div>
     <div id="body">
       <el-table
-        :data="$store.state.restaurant.tables"
+        :data="$store.state.restaurant.products"
         stripe
         style="width: 100%"
       >
         <el-table-column
           prop="name"
-          label="桌号"
+          label="名称"
         >
         </el-table-column>
         <el-table-column
-          prop="defaultSeat"
-          label="默认桌位数"
+          prop="price"
+          label="价格"
         >
         </el-table-column>
         <el-table-column
-          prop=""
-          label="所属区域"
+          prop="label"
+          label="标签"
         >
         </el-table-column>
         <el-table-column
@@ -47,7 +47,7 @@
       >
         <el-form :model="form">
           <el-form-item
-            label="桌号"
+            label="名称"
             :label-width="formLabelWidth"
           >
             <el-input
@@ -56,15 +56,35 @@
             ></el-input>
           </el-form-item>
           <el-form-item
-            label="默认座位数"
+            label="价格"
             :label-width="formLabelWidth"
           >
             <el-input-number
-              v-model="form.defaultSeat"
+              v-model="form.price"
               :min="1"
               :max="10"
               label="描述文字"
             ></el-input-number>
+          </el-form-item>
+          <el-form-item
+            label="标签"
+            :label-width="formLabelWidth"
+          >
+            <el-select
+              v-model="form.label"
+              multiple
+              collapse-tags
+              style="margin-left: 20px;"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <div
@@ -74,7 +94,7 @@
           <el-button
             type="danger"
             round
-            @click="removeTable(form)"
+            @click="removeProduc(form)"
             v-if="form._id"
           >删除桌面</el-button>
           <el-button
@@ -118,29 +138,46 @@ export default {
       formId: "",
       form: {
         name: '',
-        defaultSeat: 2,
+        price: 0,
+        label: []
       },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      options: [{
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }, {
+        value: '选项4',
+        label: '龙须面'
+      }, {
+        value: '选项5',
+        label: '北京烤鸭'
+      }],
     }
   },
   methods: {
-    insertTable() {
-      restaurantWebApi.createTables(this.form).then(() => {
+    insertProduc() {
+      restaurantWebApi.createProduct(this.form).then(() => {
         this.defaultForm()
-        this.$store.dispatch("fetchTables")
+        this.$store.dispatch("fetchProduct")
       })
     },
-    updateTable() {
-      restaurantWebApi.editTable(this.form).then(() => {
+    updateProduc() {
+      restaurantWebApi.editProduct(this.form).then(() => {
         this.defaultForm()
-        this.$store.dispatch("fetchTables")
+        this.$store.dispatch("fetchProduct")
       })
     },
-    removeTable() {
-      restaurantWebApi.deleteTable(this.form).then(() => {
+    removeProduc() {
+      restaurantWebApi.deleteProduct(this.form).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
-        this.$store.dispatch("fetchTables")
+        this.$store.dispatch("fetchProduct")
       })
     },
     openCreateDialog() {
@@ -152,9 +189,9 @@ export default {
     },
     save() {
       if (this.form._id) {
-        this.updateTable()
+        this.updateProduc()
       } else {
-        this.insertTable()
+        this.insertProduc()
       }
       this.dialogFormVisible = false
     },
@@ -167,7 +204,7 @@ export default {
   },
   mounted() {
     let self = this
-    self.$store.dispatch("fetchTables")
+    self.$store.dispatch("fetchProduct")
   }
 }
 </script>

@@ -40,7 +40,7 @@
           <span>消息</span>
         </li> -->
         <router-link
-          to="/setting/tableList"
+          to="/setting/home"
           tag="li"
         >
           <i class="icon-cog"></i>
