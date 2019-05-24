@@ -66,7 +66,6 @@ export default {
   },
   mounted() {
     var self = this
-    console.log("xx", self.menuList)
   }
 }
 </script>

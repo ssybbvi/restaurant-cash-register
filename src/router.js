@@ -24,11 +24,6 @@ const router = new Router({
           name: 'tables'
         },
         {
-          path: 'edit-tables',
-          component: () => import('./views/tables/Edit.vue'),
-          name: 'edit-tables'
-        },
-        {
           path: 'products',
           component: () => import('./views/products/Index.vue'),
           name: 'products'
@@ -63,6 +58,17 @@ const router = new Router({
           component: () => import('./views/setting/ProductList.vue'),
         }
       ]
+    },
+    {
+      path: '/orders',
+      component: Layout,
+      name: '桌台',
+      iconCls: '',
+      children: [{
+        path: '/orders/shoppingcart',
+        component: () => import('@/views/orders/ShoppingCart.vue'),
+        name: 'shoppingcart'
+      }, ]
     }
 
 

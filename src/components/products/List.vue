@@ -24,6 +24,7 @@
 <script>
 import Search from '@/components/comm/Search.vue'
 import MinorMenus from '@/components/comm/MinorMenus.vue'
+import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data: function () {
@@ -44,7 +45,10 @@ export default {
     MinorMenus
   },
   mounted: function () {
-    // var self = this
+    var self = this
+    restaurantWebApi.fetchProduct().then(resolve => {
+      self.productList = resolve.data.data
+    })
     // self.$store.dispatch("fetchProductAndMenu").then(() => {
     //   if (self.$store.getters.productMenus.length > 0) {
     //     self.$refs.MinorMenus.menuList = self.$store.getters.productMenus.map(item => {

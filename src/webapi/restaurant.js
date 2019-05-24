@@ -18,14 +18,7 @@ export default {
     fetchTableAreas() {
         return axios.get("/tableArea")
     },
-    openTable(params) {
-        return axios.post("/table/open", params)
-    },
-    viewTable(params) {
-        return axios.get("/table/view", {
-            params
-        })
-    },
+
 
     fetchProduct() {
         return axios.get("/product")
@@ -38,6 +31,36 @@ export default {
     },
     deleteProduct(doc) {
         return axios.delete("/product", doc)
+    },
+
+
+
+
+    getOrder(_id) {
+        return axios.get(`/order/${_id}`)
+    },
+    fetchOrder(query) {
+        return axios.get('order', query)
+    },
+    createOrder(doc) {
+        return axios.post("/order", doc)
+    },
+    editOrder(doc) {
+        return axios.put("/order", doc)
+    },
+    deleteOrder(doc) {
+        return axios.delete("/order", doc)
+    },
+
+
+    openTable(doc) {
+        return axios.post("/opentable", doc)
+    },
+    updateOrderProduct(doc) {
+        return axios.put("/updateOrderProduct", doc)
+    },
+    paymentOrder(doc) {
+        return axios.put("/updateOrderProduct", doc)
     },
 
 

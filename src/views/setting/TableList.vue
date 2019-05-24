@@ -88,7 +88,7 @@
   </div>
 
 </template>
-<style>
+<style scoped lang="scss">
 #container {
   margin: 20px;
   width: 100%;
@@ -115,7 +115,6 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      formId: "",
       form: {
         name: '',
         defaultSeat: 2,

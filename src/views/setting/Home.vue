@@ -26,7 +26,7 @@
   </div>
 
 </template>
-<style scoped  >
+<style scoped  lang="scss">
 #container {
   width: 100%;
 }

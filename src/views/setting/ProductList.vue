@@ -108,7 +108,7 @@
   </div>
 
 </template>
-<style>
+<style scoped lang="scss">
 #container {
   margin: 20px;
   width: 100%;
@@ -139,7 +139,8 @@ export default {
       form: {
         name: '',
         price: 0,
-        label: []
+        label: [],
+        stock: 0
       },
       formLabelWidth: '120px',
       options: [{
@@ -198,7 +199,9 @@ export default {
     defaultForm() {
       this.form = {
         name: '',
-        defaultSeat: 2
+        price: 0,
+        label: [],
+        stock: 0
       }
     }
   },
