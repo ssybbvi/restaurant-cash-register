@@ -68,7 +68,11 @@ const router = new Router({
         path: '/orders/shoppingcart',
         component: () => import('@/views/orders/ShoppingCart.vue'),
         name: 'shoppingcart'
-      }, ]
+      }, {
+        path: '/orders/list',
+        component: () => import('@/views/orders/List.vue'),
+        name: 'order-list'
+      }]
     }
 
 

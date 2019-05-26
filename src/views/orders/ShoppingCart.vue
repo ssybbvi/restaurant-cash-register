@@ -4,11 +4,25 @@
       ref="orderItems"
       :order="order"
       @order-make="orderMake()"
-      @order-item-detail="orderItemDetail()"
+      @selected-order-item="selectedOrderItem"
+      @set-mode="setMode"
     ></order-items>
-    <!-- <product-list @selected="selectedProduct"></product-list> -->
-    <order-item-info></order-item-info>
-    <!-- <settlement></settlement> -->
+    <product-list
+      @selected="selectedProduct"
+      v-if="currentOrderMode==orderMode.productProductList"
+      @set-mode="setMode"
+    ></product-list>
+    <order-item-info
+      v-if="currentOrderMode==orderMode.productItemInfo"
+      :product-item="productItem"
+      @update-product-item="updateProductItem"
+      @set-mode="setMode"
+    ></order-item-info>
+    <settlement
+      v-if="currentOrderMode==orderMode.settlement"
+      @set-mode="setMode"
+      :order="order"
+    ></settlement>
   </section>
 </template>
 <script>
@@ -28,7 +42,14 @@ export default {
         productItems: [],
         offerPriceItems: [],
         eventItems: []
-      }
+      },
+      productItem: {},
+      orderMode: {
+        productProductList: 1,
+        productItemInfo: 2,
+        settlement: 3
+      },
+      currentOrderMode: 1
     }
   },
   components: {
@@ -38,6 +59,11 @@ export default {
     Settlement
   },
   methods: {
+    setMode(mode) {
+      let self = this
+      console.log(mode)
+      self.currentOrderMode = mode
+    },
     updateOrder() {
       let self = this
       restaurantApi.updateOrderProduct(self.order).then(resolve => {
@@ -55,7 +81,13 @@ export default {
           name: product.name,
           quantity: 1,
           price: product.price,
-          status: enumerate.productStatus.normal
+          status: enumerate.productStatus.normal,
+          isGift: false,
+          isTimeout: false,
+          isExpedited: false,
+          isBale: false,
+          lastUpateTime: new Date().getTime(),
+          remarks: ""
         })
       }
       self.updateOrder()
@@ -67,9 +99,16 @@ export default {
       })
       self.updateOrder()
     },
-    orderItemDetail() {
+    selectedOrderItem(product) {
       let self = this
+      self.productItem = product
     },
+    updateProductItem(product) {
+      let self = this
+      let productIndex = self.order.productItems.findIndex(f => f._id == product._id)
+      self.order.productItems[productIndex] = product
+      self.updateOrder()
+    }
   },
   mounted() {
     let self = this

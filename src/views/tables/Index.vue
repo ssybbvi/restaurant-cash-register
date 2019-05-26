@@ -5,7 +5,7 @@
         <li
           v-if="item.status==1"
           :key="item._id"
-          :class="statusColor[item.status-1]"
+          :class="item.status|tabelStatusColor"
         >
           <span class="people">{{item.defaultSeat}}人</span>
           <span class="number">{{item.name}}</span>
@@ -13,32 +13,20 @@
             class="datetime"
             @click="setSeat(item)"
           >点击开台</span>
-          <span
-            class="datetime"
-            @click="$router.push('/orders/shoppingcart')"
-          >{{item.startDateTime}}</span>
-          <span class="status">{{statusRemark[item.status]}}</span>
+          <span class="status">{{item.status|tableStatusTags}}</span>
         </li>
         <li
-          v-if="item.status==2"
+          v-if="item.status>1"
           :key="item._id"
-          :class="statusColor[item.status-1]"
+          :class="item.status|tabelStatusColor"
+          @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})"
         >
           <span class="people">{{item.seat}}人</span>
           <span class="number">{{item.name}}</span>
-          <span
-            class="datetime"
-            @click="setSeat(item)"
-          >{{item.startDateTime}}</span>
-          <span
-            class="datetime"
-            @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})"
-          >{{item.startDateTime}}</span>
-          <span class="status">{{statusRemark[item.status]}}</span>
-          <span class="status">{{statusRemark[item.status]}}</span>
+          <span class="datetime">{{moment(item.startDateTime).toNow()}}</span>
+          <span class="status">{{item.status|tableStatusTags}}</span>
         </li>
       </template>
-
     </ul>
     <minor-menus
       ref="minorMenus"
@@ -79,12 +67,9 @@
 import MinorMenus from '@/components/comm/MinorMenus.vue'
 import restaurantWebApi from '@/webapi/restaurant'
 
-
 export default {
   data() {
     return {
-      statusColor: ["green", "blue", "red", "gray"],
-      statusRemark: ["未开台", "点菜中", "用餐中", "待清桌"],
       tableList: [],
       dialogFormVisible: false,
       form: {
@@ -123,7 +108,6 @@ export default {
     let self = this
     restaurantWebApi.fetchTables().then(resolve => {
       self.tableList = resolve.data.data
-      console.log(self.tableList)
     })
   },
   destroyed() {

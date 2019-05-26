@@ -2,8 +2,8 @@ import axios from './index'
 
 
 export default {
-    fetchTables() {
-        return axios.get("/table")
+    fetchTables(doc) {
+        return axios.get("/table", doc)
     },
     createTables(doc) {
         return axios.post("/table", doc)
@@ -20,8 +20,24 @@ export default {
     },
 
 
-    fetchProduct() {
-        return axios.get("/product")
+    fetchRemark(doc) {
+        return axios.get("/remark", doc)
+    },
+    createRemark(doc) {
+        return axios.post("/remark", doc)
+    },
+    editRemark(doc) {
+        return axios.put("/remark", doc)
+    },
+    deleteRemark(doc) {
+        return axios.delete("/remark", {
+            data: doc
+        })
+    },
+
+
+    fetchProduct(doc) {
+        return axios.get("/product", doc)
     },
     createProduct(doc) {
         return axios.post("/product", doc)
@@ -60,7 +76,7 @@ export default {
         return axios.put("/updateOrderProduct", doc)
     },
     paymentOrder(doc) {
-        return axios.put("/updateOrderProduct", doc)
+        return axios.post("/paymentOrder", doc)
     },
 
 

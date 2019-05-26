@@ -1,41 +1,38 @@
 <template>
   <section>
     <div class="product-status">
-      <el-button @click="$store.commit('SWITCH_ORDERITEMS',{})">返回</el-button>
+      <el-button @click="$emit('set-mode',1)">返回</el-button>
       <el-button
         @click="giftOrderItem"
-        :class="{'gift':$store.state.restaurant.currentOrderItem.isGift}"
-      >{{$store.state.restaurant.currentOrderItem.isGift?"取消赠菜":"赠菜"}}</el-button>
+        :class="{'gift':productItem.isGift}"
+      >{{productItem.isGift?"取消赠菜":"赠菜"}}</el-button>
       <el-button
         @click="timeOutOrderItem"
-        :class="{'time-out':$store.state.restaurant.currentOrderItem.isTimeout}"
-      >{{$store.state.restaurant.currentOrderItem.isTimeout?"取消暂停":"暂停"}}</el-button>
+        :class="{'time-out':productItem.isTimeout}"
+      >{{productItem.isTimeout?"取消暂停":"暂停"}}</el-button>
       <el-button
         @click="expediteOrderItem"
-        :class="{'expedited':$store.state.restaurant.currentOrderItem.isExpedited}"
-      >{{$store.state.restaurant.currentOrderItem.isExpedited?"取消加急":"加急"}}</el-button>
+        :class="{'expedited':productItem.isExpedited}"
+      >{{productItem.isExpedited?"取消加急":"加急"}}</el-button>
       <el-button
         @click="baleOrderItem"
-        :class="{'bale':$store.state.restaurant.currentOrderItem.isBale}"
-      >{{$store.state.restaurant.currentOrderItem.isBale?"取消打包":"打包"}}</el-button>
+        :class="{'bale':productItem.isBale}"
+      >{{productItem.isBale?"取消打包":"打包"}}</el-button>
       <!-- <el-button @click="">返回菜单</el-button> -->
     </div>
     <div class="product-info">
       <el-form label-width="80px">
         <el-form-item label="菜名">
-          {{$store.state.restaurant.currentOrderItem.name}}
+          {{productItem.name}}
         </el-form-item>
         <el-form-item label="数量">
           <span id="quantity">
-            <el-button
-              icon="edit"
-              @click="quantity--"
-            ></el-button>
-            <el-input :value="quantity"></el-input>
-            <el-button
-              icon="edit"
-              @click="quantity++"
-            ></el-button>
+            <el-input-number
+              v-model="productItem.quantity"
+              @change="savePorductItem"
+              :min="0"
+              :max="10"
+            ></el-input-number>
           </span>
         </el-form-item>
         <el-form-item label="备注">
@@ -43,33 +40,36 @@
             type="textarea"
             :rows="2"
             placeholder="请输入内容"
+            v-model="productItem.remark"
           > </el-input>
-          <el-button
-            class="button-new-tag"
-            size="small"
-            @click="handleInputConfirmTag"
-          >将备注保存为常用备注</el-button>
         </el-form-item>
         <el-form-item label="">
-          <ul id="tags">
-            <li
-              v-for="item in dynamicTags"
-              :key="item"
-            >
-              <div>
-                <span>
-                  <i></i>
-                </span>
-                <span @click="selectTag(item)">{{item}}</span>
-              </div>
-              <div>
-                <i
-                  class="icon-remove"
-                  @click="handleCloseTag(item)"
-                ></i>
-              </div>
-            </li>
-          </ul>
+          <el-tag
+            :key="item._id"
+            v-for="item in productRemark"
+            closable
+            :disable-transitions="false"
+            @close="handleCloseRemark(item)"
+            @click="selectRemark(item)"
+          >
+            {{item.content}}
+          </el-tag>
+          <el-input
+            class="input-new-tag"
+            v-if="reamrkInputVisible"
+            v-model="remakContent"
+            ref="saveTagInput"
+            size="small"
+            @keyup.enter.native="inputConfirmRemark"
+            @blur="inputConfirmRemark"
+          >
+          </el-input>
+          <el-button
+            v-else
+            class="button-new-tag"
+            size="small"
+            @click="showRemarkInput"
+          >创建快速备注</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -79,82 +79,85 @@
 <script>
 import restaurantApi from '@/webapi/restaurant'
 import * as types from '@/store/mutation-types'
+import enumerate from '@/filter/enumerate'
 
 export default {
-  props: ['currentOrderItem'],
+  props: ['productItem'],
   data() {
     return {
-      dynamicTags: ['标签一', '标签二', '标签三'],
+      productRemark: [],
+      reamrkInputVisible: false,
+      remakContent: ""
     }
   },
   components: {
   },
-  sockets: {
-
-  },
-  computed: {
-    quantity: {
-      get() {
-        return this.$store.state.restaurant.currentOrderItem.quantity
-      },
-      set(value) {
-        let self = this
-        restaurantApi.quantityOrderItem({
-          tableId: self.$route.query.tableId,
-          orderItemId: self.$store.state.restaurant.currentOrderItem._id,
-          quantity: value
+  methods: {
+    loadRmark() {
+      let self = this
+      restaurantApi.fetchRemark({ params: { type: enumerate.remarkType.product } }).then(resolve => {
+        self.productRemark = resolve.data.data
+      })
+    },
+    showRemarkInput() {
+      this.reamrkInputVisible = true;
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+    handleCloseRemark(remark) {
+      let self = this
+      restaurantApi.deleteRemark({ _id: remark._id }).then(resolve => {
+        self.loadRmark()
+      })
+    },
+    inputConfirmRemark() {
+      let self = this
+      let remakContent = this.remakContent;
+      if (remakContent) {
+        restaurantApi.createRemark({ type: enumerate.remarkType.product, content: remakContent }).then(resolve => {
+          self.loadRmark()
         })
       }
-    }
-  },
-  methods: {
-    handleCloseTag(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+      this.reamrkInputVisible = false;
+      this.remakContent = '';
     },
-    handleInputConfirmTag() {
+    selectRemark(remark) {
       let self = this
-      if (self.$store.state.restaurant.currentOrderItem.remarks) {
-        self.dynamicTags.push(self.$store.state.restaurant.currentOrderItem.remarks);
-      }
+      self.productItem.remark = self.productItem.remark + remark.content
+      self.savePorductItem()
     },
-    selectTag(tag) {
-      let self = this
-      self.$store.state.restaurant.currentOrderItem.remarks = self.$store.state.restaurant.currentOrderItem.remarks + tag
-    },
-
-
 
     giftOrderItem() {
       let self = this
-      restaurantApi.giftOrderItem({
-        tableId: self.$route.query.tableId,
-        orderItemId: self.$store.state.restaurant.currentOrderItem._id,
-      })
+      self.productItem.isGift = !self.productItem.isGift
+      self.savePorductItem()
     },
     timeOutOrderItem() {
       let self = this
-      restaurantApi.timeOutOrderItem({
-        tableId: self.$route.query.tableId,
-        orderItemId: self.$store.state.restaurant.currentOrderItem._id,
-      })
+      self.productItem.isExpedited = false
+      self.productItem.isTimeout = !self.productItem.isTimeout
+      self.savePorductItem()
     },
     expediteOrderItem() {
       let self = this
-      restaurantApi.expediteOrderItem({
-        tableId: self.$route.query.tableId,
-        orderItemId: self.$store.state.restaurant.currentOrderItem._id,
-      })
+      self.productItem.isTimeout = false
+      self.productItem.isExpedited = !self.productItem.isExpedited
+      self.savePorductItem()
     },
     baleOrderItem() {
       let self = this
-      restaurantApi.baleOrderItem({
-        tableId: self.$route.query.tableId,
-        orderItemId: self.$store.state.restaurant.currentOrderItem._id,
-      })
+      self.productItem.isBale = !self.productItem.isBale
+      self.savePorductItem()
     },
+    savePorductItem() {
+      let self = this
+      self.$emit("update-product-item", self.productItem)
+    }
   },
   mounted() {
     var self = this
+    self.loadRmark()
   }
 }
 </script>
@@ -203,21 +206,20 @@ section {
     }
   }
 
-  #tags {
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 14px;
-    li {
-      display: flex;
-      i {
-        margin-left: 10px;
-        margin-right: 20px;
-      }
-    }
+  .el-tag + .el-tag {
+    margin-left: 10px;
   }
-}
-
-#quantity {
-  display: flex;
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+  }
 }
 </style>

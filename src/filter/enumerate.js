@@ -14,4 +14,13 @@ export default {
         cooking: 2,
         finish: 3
     },
+    remarkType: {
+        product: 1,
+        order: 2
+    },
+    orderMode: {
+        productProductList: 1,
+        productItemInfo: 2,
+        settlement: 3
+    },
 }

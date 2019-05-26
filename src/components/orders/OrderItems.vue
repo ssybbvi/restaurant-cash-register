@@ -1,23 +1,23 @@
 <template>
   <div id="order">
     <ul class="info">
-      <li>{{order.area}}</li>
-      <li>{{order.name}}</li>
+      <li>{{1}}</li>
+      <li>{{order.tableName}}</li>
       <li>
         <i class="icon-time fs22"></i>
-        <span>{{order.startDataTime}}</span>
+        <span>{{moment().subtract(moment(order.startDataTime)).format("mm分ss秒")}}</span>
       </li>
     </ul>
     <div class="orderItems">
       <span>
         <ul
           @click="selectedOrderItem(item)"
-          v-for="item in nomalProductList"
-          :key="item._id"
+          v-for="item in order.productItems"
+          :key="item.lastUpateTime"
         >
-          <li class="order-items-ing">{{item.name}}</li>
+          <li>{{item.name}}</li>
           <li>
-            <span>￥{{item.price}}</span>
+            <span>￥{{item.price}}x{{item.quantity}}</span>
             <span
               v-show="item.isGift"
               class="gift"
@@ -42,7 +42,8 @@
           <ul
             @click="selectedOrderItem(item)"
             v-for="item in otherProductList"
-            :key="item._id"
+            :key="item.lastUpateTime"
+            v-if="false"
           >
             <li class="order-items">{{item.name}}</li>
             <li>
@@ -69,13 +70,16 @@
         </transition-group>
       </draggable>
       <ul class="summary">
-        <li>结算:￥{{order.totalPrice}}</li>
+        <li>总金额:￥{{order.totalPrice}}</li>
       </ul>
     </div>
 
     <div class="foot">
-      <el-button @click="$emit('order-make')">下单到厨房</el-button>
-      <el-button>结算</el-button>
+      <el-button
+        @click="$emit('order-make')"
+        v-if="false"
+      >下单到厨房</el-button>
+      <el-button @click="$emit('set-mode',3)">开始结算</el-button>
     </div>
   </div>
 </template>
@@ -106,10 +110,8 @@ export default {
     },
     selectedOrderItem(item) {
       let self = this
-
-    },
-    computerOpenTime(time) {
-      return time - new Date()
+      self.$emit("selected-order-item", item)
+      self.$emit("set-mode", 2)
     },
 
     orderMake() {
@@ -127,7 +129,7 @@ export default {
     }
   },
   mounted() {
-    var self = this
+    //var self = this
   }
 }
 </script>

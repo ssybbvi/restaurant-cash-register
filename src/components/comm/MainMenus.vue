@@ -10,11 +10,11 @@
           <span>桌面</span>
         </router-link>
         <router-link
-          to="/products"
+          to="/orders/list"
           tag="li"
         >
           <i class="icon-food"></i>
-          <span>菜品</span>
+          <span>订单</span>
         </router-link>
         <!-- <router-link
           to="/queues"
