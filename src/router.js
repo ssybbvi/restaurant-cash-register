@@ -58,6 +58,11 @@ const router = new Router({
           path: '/setting/product-list',
           name: 'setting-product-list',
           component: () => import('./views/setting/ProductList.vue'),
+        },
+        {
+          path: '/setting/product-type-list',
+          name: 'setting-product-type-list',
+          component: () => import('./views/setting/ProductTypeList.vue'),
         }
       ]
     },

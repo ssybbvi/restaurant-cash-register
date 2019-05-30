@@ -12,9 +12,9 @@
         <li
           :class="{'current':current==item._id}"
           v-for="item in menuList"
-          :key="item.name"
-          @click="selected(item._id)"
-        >{{item.name}}</li>
+          :key="item"
+          @click="selected(item)"
+        >{{item}}</li>
       </ul>
     </nav>
   </aside>
@@ -56,10 +56,10 @@ export default {
     }
   },
   methods: {
-    selected(_id) {
+    selected(item) {
       var self = this
-      self.current = _id
-      self.$emit('selected', _id)
+      self.current = item
+      self.$emit('selected', item)
     }
   },
   mounted() {

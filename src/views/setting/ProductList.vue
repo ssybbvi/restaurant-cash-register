@@ -9,7 +9,7 @@
     </div>
     <div id="body">
       <el-table
-        :data="$store.state.restaurant.products"
+        :data="productList"
         stripe
         style="width: 100%"
       >
@@ -78,10 +78,10 @@
               placeholder="请选择"
             >
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="item in productTypeList"
+                :key="item._id"
+                :label="item.name"
+                :value="item.name"
               >
               </el-option>
             </el-select>
@@ -95,8 +95,8 @@
             type="danger"
             round
             @click="removeProduc(form)"
-            v-if="form._id"
-          >删除桌面</el-button>
+            v-if="formId"
+          >删除</el-button>
           <el-button
             type="primary"
             @click="save()"
@@ -134,6 +134,8 @@ import restaurantWebApi from '@/webapi/restaurant'
 export default {
   data() {
     return {
+      productList: [],
+      productTypeList: [],
       dialogFormVisible: false,
       formId: "",
       form: {
@@ -143,42 +145,27 @@ export default {
         stock: 0
       },
       formLabelWidth: '120px',
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
     }
   },
   methods: {
     insertProduc() {
       restaurantWebApi.createProduct(this.form).then(() => {
         this.defaultForm()
-        this.$store.dispatch("fetchProduct")
+        this.loadProductList()
       })
     },
     updateProduc() {
-      restaurantWebApi.editProduct(this.form).then(() => {
+      let self = this
+      restaurantWebApi.editProduct({ _id: self.formId }, this.form).then(() => {
         this.defaultForm()
-        this.$store.dispatch("fetchProduct")
+        this.loadProductList()
       })
     },
     removeProduc() {
       restaurantWebApi.deleteProduct(this.form).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
-        this.$store.dispatch("fetchProduct")
+        this.loadProductList()
       })
     },
     openCreateDialog() {
@@ -186,10 +173,11 @@ export default {
     },
     openEditDialog(item) {
       this.form = item
+      this.formId = item._id
       this.dialogFormVisible = true
     },
     save() {
-      if (this.form._id) {
+      if (this.formId) {
         this.updateProduc()
       } else {
         this.insertProduc()
@@ -203,11 +191,24 @@ export default {
         label: [],
         stock: 0
       }
+    },
+    loadProductList() {
+      var self = this
+      restaurantWebApi.fetchProduct().then(resolve => {
+        self.productList = resolve.data.data
+      })
+    },
+    loadProductTypeList() {
+      var self = this
+      restaurantWebApi.fetchProductType().then(resolve => {
+        self.productTypeList = resolve.data.data
+      })
     }
   },
   mounted() {
     let self = this
-    self.$store.dispatch("fetchProduct")
+    self.loadProductList()
+    self.loadProductTypeList()
   }
 }
 </script>

@@ -4,7 +4,7 @@
       <search></search>
       <ul>
         <li
-          v-for="item in productList"
+          v-for="item in productListByType"
           @click="$emit('selected',item)"
           :key="item.id"
         >
@@ -18,7 +18,13 @@
     <minor-menus
       ref="MinorMenus"
       @selected="switchMenu"
-    ></minor-menus>
+      :menu-list="productTypeList.map(item=>item.name)"
+      :top_menu_name="'全部'"
+    >
+      <li>
+        全部
+      </li>
+    </minor-menus>
   </div>
 </template>
 <script>
@@ -29,14 +35,36 @@ import restaurantWebApi from '@/webapi/restaurant'
 export default {
   data: function () {
     return {
-      productList: []
+      productList: [],
+      productTypeList: [],
+      currentType: ""
+    }
+  },
+  computed: {
+    productListByType() {
+      let self = this
+      if (self.currentType) {
+        return self.productList.filter(f => f.label.some(s => s == self.currentType))
+      } else {
+        return self.productList
+      }
     }
   },
   methods: {
     switchMenu(parameter) {
       var self = this
-      self.productList = self.$store.getters.products.filter(item => {
-        return item.productMenuId == parameter
+      self.currentType = parameter
+    },
+    loadProductList() {
+      var self = this
+      restaurantWebApi.fetchProduct().then(resolve => {
+        self.productList = resolve.data.data
+      })
+    },
+    loadProductTypeList() {
+      var self = this
+      restaurantWebApi.fetchProductType().then(resolve => {
+        self.productTypeList = resolve.data.data
       })
     }
   },
@@ -46,17 +74,8 @@ export default {
   },
   mounted: function () {
     var self = this
-    restaurantWebApi.fetchProduct().then(resolve => {
-      self.productList = resolve.data.data
-    })
-    // self.$store.dispatch("fetchProductAndMenu").then(() => {
-    //   if (self.$store.getters.productMenus.length > 0) {
-    //     self.$refs.MinorMenus.menuList = self.$store.getters.productMenus.map(item => {
-    //       return { name: item.name, parameter: item._id }
-    //     })
-    //     self.$refs.MinorMenus.selected(self.$store.getters.productMenus[0]._id)
-    //   }
-    // })
+    self.loadProductList()
+    self.loadProductTypeList()
   }
 }
 </script>

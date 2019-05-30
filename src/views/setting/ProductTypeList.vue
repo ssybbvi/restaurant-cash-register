@@ -9,23 +9,13 @@
     </div>
     <div id="body">
       <el-table
-        :data="tableList"
+        :data="tableAreaList"
         stripe
         style="width: 100%"
       >
         <el-table-column
           prop="name"
-          label="桌号"
-        >
-        </el-table-column>
-        <el-table-column
-          prop="defaultSeat"
-          label="默认桌位数"
-        >
-        </el-table-column>
-        <el-table-column
-          prop="label"
-          label="所属区域"
+          label="类型"
         >
         </el-table-column>
         <el-table-column
@@ -42,12 +32,12 @@
         </el-table-column>
       </el-table>
       <el-dialog
-        title="桌面"
+        title="菜品类型"
         :visible.sync="dialogFormVisible"
       >
         <el-form :model="form">
           <el-form-item
-            label="桌号"
+            label="类型"
             :label-width="formLabelWidth"
           >
             <el-input
@@ -55,39 +45,6 @@
               autocomplete="off"
             ></el-input>
           </el-form-item>
-          <el-form-item
-            label="默认座位数"
-            :label-width="formLabelWidth"
-          >
-            <el-input-number
-              v-model="form.defaultSeat"
-              :min="1"
-              :max="10"
-              label="描述文字"
-            ></el-input-number>
-          </el-form-item>
-
-          <el-form-item
-            label="标签"
-            :label-width="formLabelWidth"
-          >
-            <el-select
-              v-model="form.label"
-              multiple
-              collapse-tags
-              style="margin-left: 20px;"
-              placeholder="请选择"
-            >
-              <el-option
-                v-for="item in tableAreaList"
-                :key="item._id"
-                :label="item.name"
-                :value="item.name"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-
         </el-form>
         <div
           slot="footer"
@@ -96,9 +53,9 @@
           <el-button
             type="danger"
             round
-            @click="removeTable(form)"
-            v-if="formId"
-          >删除桌面</el-button>
+            @click="removeProductType(form)"
+            v-if="tableTableId"
+          >删除</el-button>
           <el-button
             type="primary"
             @click="save()"
@@ -136,78 +93,69 @@ import restaurantWebApi from '@/webapi/restaurant'
 export default {
   data() {
     return {
-      dialogFormVisible: false,
-      tableList: [],
       tableAreaList: [],
-      formId: "",
-      form: {},
+      dialogFormVisible: false,
+      tableTableId: "",
+      form: {
+        name: ''
+      },
       formLabelWidth: '120px'
     }
   },
   methods: {
-    loadTableList() {
+    loadProductType() {
       let self = this
-      restaurantWebApi.fetchTables().then(resolve => {
-        self.tableList = resolve.data.data
-      })
-    },
-    loadTableAreaList() {
-      let self = this
-      restaurantWebApi.fetchTableArea().then(resolve => {
+      restaurantWebApi.fetchProductType().then(resolve => {
         self.tableAreaList = resolve.data.data
       })
     },
-    insertTable() {
+    insertProductType() {
       let self = this
-      restaurantWebApi.createTables(this.form).then(() => {
+      restaurantWebApi.createProductType(this.form).then(() => {
         this.defaultForm()
-        self.loadTableList()
+        this.loadProductType()
       })
     },
-    updateTable() {
+    updateProductType() {
       let self = this
-      restaurantWebApi.editTable({ _id: self.formId }, this.form).then(() => {
+      restaurantWebApi.editProductType({ _id: self.tableTableId }, this.form).then(() => {
         this.defaultForm()
-        self.loadTableList()
+        this.loadProductType()
       })
     },
-    removeTable() {
+    removeProductType() {
       let self = this
-      restaurantWebApi.deleteTable(this.form).then(() => {
+      restaurantWebApi.deleteProductType(this.form).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
-        self.loadTableList()
+        this.loadProductType()
       })
     },
     openCreateDialog() {
       this.dialogFormVisible = true
     },
     openEditDialog(item) {
+      this.tableTableId = item._id
       this.form = item
       this.dialogFormVisible = true
-      this.formId = item._id
     },
     save() {
-      if (this.formId) {
-        this.updateTable()
+      if (this.tableTableId) {
+        this.updateProductType()
       } else {
-        this.insertTable()
+        this.insertProductType()
       }
       this.dialogFormVisible = false
     },
     defaultForm() {
       this.form = {
-        name: '',
-        aera: [],
-        defaultSeat: 2
+        name: ''
       }
-    }
+    },
   },
   mounted() {
     let self = this
-    self.defaultForm()
-    self.loadTableList()
-    self.loadTableAreaList()
+    self.loadProductType()
   }
 }
 </script>

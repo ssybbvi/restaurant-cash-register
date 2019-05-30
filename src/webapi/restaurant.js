@@ -69,6 +69,20 @@ export default {
     },
 
 
+    fetchProductType() {
+        return axios.get("/productType")
+    },
+    createProductType(doc) {
+        return axios.post("/productType", doc)
+    },
+    editProductType(query, doc) {
+        return axios.put("/productType", doc, {
+            params: query
+        })
+    },
+    deleteProductType(doc) {
+        return axios.delete("/productType", doc)
+    },
 
 
     getOrder(_id) {

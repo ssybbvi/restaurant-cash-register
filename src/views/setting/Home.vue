@@ -21,6 +21,12 @@
         >
           菜品管理
         </router-link>
+        <router-link
+          to="/setting/product-type-list"
+          tag="li"
+        >
+          菜品类型管理
+        </router-link>
       </ul>
     </div>
   </div>

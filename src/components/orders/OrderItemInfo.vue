@@ -50,7 +50,7 @@
           <el-tag
             :key="item._id"
             v-for="item in productRemark"
-            closable
+            :closable="remarkEditMode"
             :disable-transitions="false"
             @close="handleCloseRemark(item)"
             @click="selectRemark(item)"
@@ -69,10 +69,23 @@
           </el-input>
           <el-button
             v-else
+            v-show="remarkEditMode"
             class="button-new-tag"
             size="small"
             @click="showRemarkInput"
           >创建快速备注</el-button>
+          <i
+            v-if="remarkEditMode"
+            @click="remarkEditMode=!remarkEditMode"
+            class="el-icon-s-tools"
+            style="font-size:24px;margin-left:10px;position: relative;top: 4px;"
+          ></i>
+          <i
+            v-if="!remarkEditMode"
+            @click="remarkEditMode=!remarkEditMode"
+            class="el-icon-setting"
+            style="font-size:24px;margin-left:10px;position: relative;top: 4px;"
+          ></i>
         </el-form-item>
       </el-form>
     </div>
@@ -94,7 +107,8 @@ export default {
     return {
       productRemark: [],
       reamrkInputVisible: false,
-      remakContent: ""
+      remakContent: "",
+      remarkEditMode: false
     }
   },
   components: {

@@ -40,7 +40,7 @@
     </ul>
     <minor-menus
       ref="minorMenus"
-      :menu-list="tableAreaList"
+      :menu-list="tableAreaList.map(item=>item.name)"
       @selected="switchMenu"
       :top_menu_name="'全部'"
     >
@@ -87,7 +87,7 @@ export default {
     return {
       tableList: [],
       tableAreaList: [],
-      currentAreaId: "",
+      currentArea: "",
       dialogFormVisible: false,
       form: {
         tableId: "",
@@ -102,8 +102,8 @@ export default {
   computed: {
     tableListWithAreaId() {
       let self = this
-      if (self.currentAreaId) {
-        return self.tableList.filter(f => f.areaId == self.currentAreaId)
+      if (self.currentArea) {
+        return self.tableList.filter(f => f.label.some(s => s == self.currentArea))
       } else {
         return self.tableList
       }
@@ -112,7 +112,7 @@ export default {
   methods: {
     switchMenu(parameter) {
       var self = this
-      self.currentAreaId = parameter
+      self.currentArea = parameter
     },
     setSeat(item) {
       this.form = {
