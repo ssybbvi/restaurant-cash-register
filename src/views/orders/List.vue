@@ -10,42 +10,41 @@
       >
         <el-table-column type="expand">
           <template slot-scope="props">
-            <el-form
-              label-position="left"
-              inline
-              class="order-table-expand"
-            >
-              <el-form-item label="所属店铺">
-                <span>{{ props.row.tableId }}</span>
-              </el-form-item>
-              <el-form-item label="商品 ID">
-                <span>{{ props.row.tableId }}</span>
-              </el-form-item>
-              <el-form-item label="店铺 ID">
-                <span>{{ props.row.tableId }}</span>
-              </el-form-item>
-              <el-form-item label="商品分类">
-                <span>{{ props.row.tableId }}</span>
-              </el-form-item>
-              <el-form-item label="店铺地址">
-                <span>{{ props.remark }}</span>
-              </el-form-item>
-              <el-form-item label="商品描述">
-                <span>{{ props.row.remark }}</span>
-              </el-form-item>
-              <el-form-item label="菜品">
-                <ul>
-                  <li v-for="item in props.row.productItems">
-                    {{item.name}}
-                  </li>
-                </ul>
-                <span>{{ props.row.name }}</span>
-              </el-form-item>
-            </el-form>
+            <el-row>
+              <el-col :span="8">
+                开始用餐：{{props.row.startDateTime|dataTime}}
+              </el-col>
+              <el-col :span="8">
+                桌号：（{{props.row.tableAreaName}}）{{props.row.tableName}}
+              </el-col>
+              <el-col :span="8">
+                结束用餐：{{props.row.endDateTime|dataTime}}
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">
+                <el-table
+                  :data="props.row.productItems"
+                  style="width: 100%"
+                >
+                  <el-table-column
+                    prop="name"
+                    label="菜品"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="price"
+                    label="价格"
+                  >
+                  </el-table-column>
+                </el-table>
+              </el-col>
+            </el-row>
+
           </template>
         </el-table-column>
         <el-table-column
-          label="商品 ID"
+          label="收银员"
           prop="id"
         >
         </el-table-column>

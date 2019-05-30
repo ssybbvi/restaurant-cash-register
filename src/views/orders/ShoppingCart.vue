@@ -61,62 +61,59 @@ export default {
   methods: {
     setMode(mode) {
       let self = this
-      console.log(mode)
       self.currentOrderMode = mode
     },
-    updateOrder() {
+    editOrderProduectItems() {
       let self = this
-      restaurantApi.updateOrderProduct(self.order).then(resolve => {
+      restaurantApi.editOrderProduectItems(self.order).then(resolve => {
         self.order = resolve.data.data
       })
     },
     selectedProduct(product) {
       let self = this
-      let orderProduct = self.order.productItems.find(f => f._id == product._id)
-      if (orderProduct) {
-        orderProduct.quantity++
-      } else {
-        self.order.productItems.push({
-          _id: product._id,
-          name: product.name,
-          quantity: 1,
-          price: product.price,
-          status: enumerate.productStatus.normal,
-          isGift: false,
-          isTimeout: false,
-          isExpedited: false,
-          isBale: false,
-          lastUpateTime: new Date().getTime(),
-          remarks: ""
-        })
-      }
-      self.updateOrder()
+      self.order.productItems.push({
+        productId: product._id,
+        isGift: false,
+        isTimeout: false,
+        isExpedited: false,
+        isBale: false,
+        isDelete: false,
+        remark: "",
+        status: enumerate.productStatus.normal
+      })
+      self.editOrderProduectItems()
     },
     orderMake() {
       let self = this
-      self.order.productItems.filter(f => f.status == enumerate.productStatus.normal).forEach(item => {
-        item.status = enumerate.productStatus.cooking
+      restaurantApi.orderMake({ orderId: self.order._id }).then(resolve => {
+        self.loadOrder()
       })
-      self.updateOrder()
     },
     selectedOrderItem(product) {
       let self = this
       self.productItem = product
+      self.currentOrderMode = this.orderMode.productItemInfo
     },
     updateProductItem(product) {
       let self = this
+      if (product.isDelete) {
+        self.currentOrderMode = this.orderMode.productProductList
+      }
       let productIndex = self.order.productItems.findIndex(f => f._id == product._id)
       self.order.productItems[productIndex] = product
-      self.updateOrder()
+      self.editOrderProduectItems()
+    },
+    loadOrder() {
+      let self = this
+      let orderId = self.$route.query.orderId
+      restaurantApi.getOrder(orderId).then(resolve => {
+        self.order = resolve.data.data
+      })
     }
   },
   mounted() {
     let self = this
-    let orderId = self.$route.query.orderId
-
-    restaurantApi.getOrder(orderId).then(resolve => {
-      self.order = resolve.data.data
-    })
+    self.loadOrder()
   }
 }
 </script>

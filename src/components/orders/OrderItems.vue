@@ -1,23 +1,23 @@
 <template>
   <div id="order">
     <ul class="info">
-      <li>{{1}}</li>
+      <li>{{order.tableAreaName}}</li>
       <li>{{order.tableName}}</li>
       <li>
         <i class="icon-time fs22"></i>
-        <span>{{moment().subtract(moment(order.startDataTime)).format("mm分ss秒")}}</span>
+        <span>{{order.startDataTime|spendTime}}</span>
       </li>
     </ul>
     <div class="orderItems">
-      <span>
+      <!-- <span >
         <ul
           @click="selectedOrderItem(item)"
-          v-for="item in order.productItems"
-          :key="item.lastUpateTime"
+          v-for="item in otherProductList "
+          :key="item._id"
         >
-          <li>{{item.name}}</li>
+          <li :class="orderItemClass(item)">{{item.name}}</li>
           <li>
-            <span>￥{{item.price}}x{{item.quantity}}</span>
+            <span>￥{{item.price}}</span>
             <span
               v-show="item.isGift"
               class="gift"
@@ -36,38 +36,64 @@
             ></span>
           </li>
         </ul>
-      </span>
-      <draggable>
-        <transition-group>
-          <ul
-            @click="selectedOrderItem(item)"
-            v-for="item in otherProductList"
-            :key="item.lastUpateTime"
-            v-if="false"
-          >
-            <li class="order-items">{{item.name}}</li>
-            <li>
-              <span>￥{{item.price}}x{{item.quantity}}</span>
-              <span
-                v-show="item.isGift"
-                class="gift"
-              ></span>
-              <span
-                v-show="item.isTimeout"
-                class="time-out"
-              ></span>
-              <span
-                v-show="item.isExpedited"
-                class="expedited"
-              ></span>
-              <span
-                v-show="item.isBale"
-                class="bale"
-              ></span>
-              <span class="highlighted-order-item"></span>
-            </li>
-          </ul>
-        </transition-group>
+      </span> -->
+      <draggable @sort="orderProductSort">
+        <ul
+          @click="selectedOrderItem(item)"
+          v-for="item in cookingProductList "
+          :key="item._id"
+        >
+          <li :class="orderItemClass(item)">{{item.name}}</li>
+          <li>
+            <span>￥{{item.price}}</span>
+            <span
+              v-show="item.isGift"
+              class="gift"
+            ></span>
+            <span
+              v-show="item.isTimeout"
+              class="time-out"
+            ></span>
+            <span
+              v-show="item.isExpedited"
+              class="expedited"
+            ></span>
+            <span
+              v-show="item.isBale"
+              class="bale"
+            ></span>
+            <span class="highlighted-order-item"></span>
+          </li>
+        </ul>
+      </draggable>
+      <draggable @sort="orderProductSort">
+        <ul
+          @click="selectedOrderItem(item)"
+          v-for="item in nomalProductList"
+          :key="item._id"
+        >
+          <li :class="orderItemClass(item)">{{item.name}}</li>
+          <li>
+            <span>￥{{item.price}}</span>
+            <span
+              v-show="item.isGift"
+              class="gift"
+            ></span>
+            <span
+              v-show="item.isTimeout"
+              class="time-out"
+            ></span>
+            <span
+              v-show="item.isExpedited"
+              class="expedited"
+            ></span>
+            <span
+              v-show="item.isBale"
+              class="bale"
+            ></span>
+            <span class="highlighted-order-item"></span>
+          </li>
+        </ul>
       </draggable>
       <ul class="summary">
         <li>总金额:￥{{order.totalPrice}}</li>
@@ -77,7 +103,7 @@
     <div class="foot">
       <el-button
         @click="$emit('order-make')"
-        v-if="false"
+        :disabled="orderMakeStatus"
       >下单到厨房</el-button>
       <el-button @click="$emit('set-mode',3)">开始结算</el-button>
     </div>
@@ -93,7 +119,14 @@ import enumerate from '@/filter/enumerate'
 export default {
   props: {
     order: {
-      type: Object
+      type: Object,
+      default() {
+        return {
+          productItems: [],
+          offerPriceItems: [],
+          eventItems: []
+        }
+      }
     }
   },
   data: function () {
@@ -111,21 +144,33 @@ export default {
     selectedOrderItem(item) {
       let self = this
       self.$emit("selected-order-item", item)
-      self.$emit("set-mode", 2)
     },
-
-    orderMake() {
+    orderItemClass(item) {
+      if (item.status == enumerate.productStatus.normal) {
+        return "order-items"
+      }
+      if (item.status == enumerate.productStatus.cooking) {
+        return "order-items-ing"
+      }
+      if (item.status == enumerate.productStatus.finish) {
+        return "order-items-finish"
+      }
+      return ""
+    },
+    orderProductSort() {
       let self = this
-      restaurantApi.orderMake({ tableId: self.$route.query.tableId })
+      console.log(this.order)
     }
-
   },
   computed: {
     nomalProductList() {
-      return this.order.productItems.filter(f => f.status != enumerate.productStatus.normal)
-    },
-    otherProductList() {
       return this.order.productItems.filter(f => f.status == enumerate.productStatus.normal)
+    },
+    cookingProductList() {
+      return this.order.productItems.filter(f => f.status == enumerate.productStatus.cooking)
+    },
+    orderMakeStatus() {
+      return !this.order.productItems.some(f => f.status == enumerate.productStatus.normal)
     }
   },
   mounted() {
@@ -179,57 +224,55 @@ export default {
   .orderItems {
     flex-grow: 1;
     overflow-y: auto;
-    span {
+    display: flex;
+    flex-direction: column;
+    ul {
       display: flex;
-      flex-direction: column;
-      ul {
+      height: 40px;
+      border-bottom: 1px solid #ccc;
+      font-size: 16px;
+      li {
         display: flex;
-        height: 40px;
-        border-bottom: 1px solid #ccc;
-        font-size: 16px;
-        li {
-          display: flex;
-          justify-content: center;
-          &.order-items {
-            color: #13ce66;
-          }
-          &.order-items-ing {
-            color: #f7ba2a;
-          }
-          &.order-items-finish {
-            color: #ff4949;
-          }
-          height: 100%;
-          display: flex;
-          align-items: center;
+        justify-content: center;
+        &.order-items {
+          color: #13ce66;
         }
-        li:nth-child(1) {
+        &.order-items-ing {
+          color: #f7ba2a;
+        }
+        &.order-items-finish {
+          color: #ff4949;
+        }
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+      li:nth-child(1) {
+        flex-grow: 1;
+        padding-left: 5px;
+      }
+      li:nth-child(2) {
+        color: #3498db;
+        flex-basis: 100px;
+        padding-left: 5px;
+        span:nth-child(1) {
           flex-grow: 1;
-          padding-left: 5px;
         }
-        li:nth-child(2) {
-          color: #3498db;
-          flex-basis: 100px;
-          padding-left: 5px;
-          span:nth-child(1) {
-            flex-grow: 1;
-          }
-          span:nth-child(2) {
-            height: 100%;
-            flex-basis: 5px;
-          }
-          span:nth-child(3) {
-            height: 100%;
-            flex-basis: 5px;
-          }
-          span:nth-child(4) {
-            height: 100%;
-            flex-basis: 5px;
-          }
-          span:nth-child(5) {
-            height: 100%;
-            flex-basis: 5px;
-          }
+        span:nth-child(2) {
+          height: 100%;
+          flex-basis: 5px;
+        }
+        span:nth-child(3) {
+          height: 100%;
+          flex-basis: 5px;
+        }
+        span:nth-child(4) {
+          height: 100%;
+          flex-basis: 5px;
+        }
+        span:nth-child(5) {
+          height: 100%;
+          flex-basis: 5px;
         }
       }
     }

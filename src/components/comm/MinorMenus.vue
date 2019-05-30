@@ -3,20 +3,18 @@
     <nav>
       <ul>
         <li
+          :class="{'current':current==''}"
+          v-if="!!top_menu_name"
+          @click="selected('')"
+        >
+          {{top_menu_name}}
+        </li>
+        <li
           :class="{'current':current==item._id}"
           v-for="item in menuList"
           :key="item.name"
           @click="selected(item._id)"
         >{{item.name}}</li>
-        <li
-          v-if="!!$listeners['set-fn']"
-          @click="$emit('set-fn')"
-        >
-          <i
-            class="icon-cog"
-            style="font-size: 28px;"
-          />
-        </li>
       </ul>
     </nav>
   </aside>
@@ -51,7 +49,7 @@ aside {
 
 <script>
 export default {
-  props: ["menu-list"],
+  props: ["menu-list", "top_menu_name"],
   data() {
     return {
       current: ""

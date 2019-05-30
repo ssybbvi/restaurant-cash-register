@@ -1,19 +1,23 @@
 <template>
   <div id="container">
     <ul>
-      <template v-for="item in tableList">
+      <template v-for="item in tableListWithAreaId">
         <li
           v-if="item.status==1"
           :key="item._id"
           :class="item.status|tabelStatusColor"
+          @click="setSeat(item)"
         >
-          <span class="people">{{item.defaultSeat}}人</span>
-          <span class="number">{{item.name}}</span>
-          <span
-            class="datetime"
-            @click="setSeat(item)"
-          >点击开台</span>
-          <span class="status">{{item.status|tableStatusTags}}</span>
+          <div class="top">
+            <span class="people">{{item.defaultSeat}}人</span>
+            <span class="number">{{item.name}}</span>
+          </div>
+          <div class="center">
+            <span>点击开台</span>
+          </div>
+          <div class="bottom">
+            {{item.status|tableStatusTags}}
+          </div>
         </li>
         <li
           v-if="item.status>1"
@@ -21,18 +25,29 @@
           :class="item.status|tabelStatusColor"
           @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})"
         >
-          <span class="people">{{item.seat}}人</span>
-          <span class="number">{{item.name}}</span>
-          <span class="datetime">{{moment(item.startDateTime).toNow()}}</span>
-          <span class="status">{{item.status|tableStatusTags}}</span>
+          <div class="top">
+            <span class="people">{{item.seat}}人</span>
+            <span class="number">{{item.name}}</span>
+          </div>
+          <div class="center">
+            <span>{{item.startDateTime|spendTime}}</span>
+          </div>
+          <div class="bottom">
+            {{item.status|tableStatusTags}}
+          </div>
         </li>
       </template>
     </ul>
     <minor-menus
       ref="minorMenus"
-      :menu-list="$store.state.restaurant.tableAreas"
+      :menu-list="tableAreaList"
       @selected="switchMenu"
-    ></minor-menus>
+      :top_menu_name="'全部'"
+    >
+      <li>
+        全部
+      </li>
+    </minor-menus>
 
     <el-dialog
       title="开台"
@@ -71,6 +86,8 @@ export default {
   data() {
     return {
       tableList: [],
+      tableAreaList: [],
+      currentAreaId: "",
       dialogFormVisible: false,
       form: {
         tableId: "",
@@ -82,12 +99,20 @@ export default {
   components: {
     MinorMenus
   },
+  computed: {
+    tableListWithAreaId() {
+      let self = this
+      if (self.currentAreaId) {
+        return self.tableList.filter(f => f.areaId == self.currentAreaId)
+      } else {
+        return self.tableList
+      }
+    }
+  },
   methods: {
     switchMenu(parameter) {
       var self = this
-      self.tableList = self.$store.getters.tables.filter(item => {
-        return item.tableAreaId == parameter
-      })
+      self.currentAreaId = parameter
     },
     setSeat(item) {
       this.form = {
@@ -102,13 +127,25 @@ export default {
       restaurantWebApi.openTable(this.form).then(resolve => {
         self.$router.push({ name: "shoppingcart", query: { orderId: resolve.data.data._id } })
       })
-    }
+    },
+    loadTableList() {
+      let self = this
+      restaurantWebApi.fetchTables().then(resolve => {
+        self.tableList = resolve.data.data
+      })
+    },
+    loadTableAreaList() {
+      let self = this
+      restaurantWebApi.fetchTableArea().then(resolve => {
+        self.tableAreaList = resolve.data.data
+      })
+    },
+
   },
   mounted() {
     let self = this
-    restaurantWebApi.fetchTables().then(resolve => {
-      self.tableList = resolve.data.data
-    })
+    self.loadTableList()
+    self.loadTableAreaList()
   },
   destroyed() {
   }
@@ -126,12 +163,16 @@ export default {
     color: white;
     padding: 10px;
     li {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
       width: 115px;
       height: 115px;
       border-radius: 10px;
       position: relative;
       font-size: 14px;
       margin: 20px;
+      font-weight: 500;
       &.green {
         background-color: #3cc05b;
       }
@@ -144,34 +185,29 @@ export default {
       &.gray {
         background-color: #ccc;
       }
-      .people {
-        position: absolute;
-        top: 10px;
-        left: 10px;
+
+      .top {
+        display: flex;
+        justify-content: space-around;
       }
 
-      .number {
-        position: absolute;
-        top: 10px;
-        left: 70px;
-      }
+      .center {
+        display: flex;
+        justify-content: center;
 
-      .datetime {
-        position: absolute;
-        top: 45px;
-        left: 10px;
-        text-align: center;
-        width: 95px;
-        background-color: #eee;
-        display: block;
+        span {
+          width: 100px;
+          background-color: #eee;
+          text-align: center;
+          padding: 2px 0;
+        }
         color: #333;
-        padding: 5px 0;
       }
 
-      .status {
-        position: absolute;
-        top: 90px;
-        left: 63px;
+      .bottom {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 5px;
       }
     }
   }

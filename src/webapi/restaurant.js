@@ -8,16 +8,31 @@ export default {
     createTables(doc) {
         return axios.post("/table", doc)
     },
-    editTable(doc) {
-        return axios.put("/table", doc)
+    editTable(query, doc) {
+        return axios.put("/table", doc, {
+            params: query
+        })
     },
     deleteTable(doc) {
         return axios.delete("/table", doc)
     },
 
-    fetchTableAreas() {
+
+    fetchTableArea() {
         return axios.get("/tableArea")
     },
+    createTableArea(doc) {
+        return axios.post("/tableArea", doc)
+    },
+    editTableArea(query, doc) {
+        return axios.put("/tableArea", doc, {
+            params: query
+        })
+    },
+    deleteTableArea(doc) {
+        return axios.delete("/tableArea", doc)
+    },
+
 
 
     fetchRemark(doc) {
@@ -26,8 +41,10 @@ export default {
     createRemark(doc) {
         return axios.post("/remark", doc)
     },
-    editRemark(doc) {
-        return axios.put("/remark", doc)
+    editRemark(query, doc) {
+        return axios.put("/remark", doc, {
+            params: query
+        })
     },
     deleteRemark(doc) {
         return axios.delete("/remark", {
@@ -42,8 +59,10 @@ export default {
     createProduct(doc) {
         return axios.post("/product", doc)
     },
-    editProduct(doc) {
-        return axios.put("/product", doc)
+    editProduct(query, doc) {
+        return axios.put("/product", doc, {
+            params: query
+        })
     },
     deleteProduct(doc) {
         return axios.delete("/product", doc)
@@ -61,8 +80,10 @@ export default {
     createOrder(doc) {
         return axios.post("/order", doc)
     },
-    editOrder(doc) {
-        return axios.put("/order", doc)
+    editOrder(query, doc) {
+        return axios.put("/order", doc, {
+            params: query
+        })
     },
     deleteOrder(doc) {
         return axios.delete("/order", doc)
@@ -77,6 +98,12 @@ export default {
     },
     paymentOrder(doc) {
         return axios.post("/paymentOrder", doc)
+    },
+    orderMake(doc) {
+        return axios.put("/orderMake", doc)
+    },
+    editOrderProduectItems(doc) {
+        return axios.put("/editOrderProduectItems", doc)
     },
 
 
@@ -116,9 +143,5 @@ export default {
         })
     },
 
-    orderMake(params) {
-        return axios.get("/order/make", {
-            params: params
-        })
-    },
+
 }

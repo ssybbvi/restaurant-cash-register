@@ -1,7 +1,7 @@
 <template>
   <section>
     <div class="product-status">
-      <el-button @click="$emit('set-mode',1)">返回</el-button>
+      <el-button @click="deleteOrderItem">删除</el-button>
       <el-button
         @click="giftOrderItem"
         :class="{'gift':productItem.isGift}"
@@ -18,14 +18,17 @@
         @click="baleOrderItem"
         :class="{'bale':productItem.isBale}"
       >{{productItem.isBale?"取消打包":"打包"}}</el-button>
-      <!-- <el-button @click="">返回菜单</el-button> -->
+      <el-button @click="$emit('set-mode',1)">返回</el-button>
     </div>
     <div class="product-info">
       <el-form label-width="80px">
         <el-form-item label="菜名">
           {{productItem.name}}
         </el-form-item>
-        <el-form-item label="数量">
+        <el-form-item
+          label="数量"
+          v-if="false"
+        >
           <span id="quantity">
             <el-input-number
               v-model="productItem.quantity"
@@ -82,7 +85,11 @@ import * as types from '@/store/mutation-types'
 import enumerate from '@/filter/enumerate'
 
 export default {
-  props: ['productItem'],
+  props: {
+    productItem: {
+      type: Object
+    }
+  },
   data() {
     return {
       productRemark: [],
@@ -127,7 +134,6 @@ export default {
       self.productItem.remark = self.productItem.remark + remark.content
       self.savePorductItem()
     },
-
     giftOrderItem() {
       let self = this
       self.productItem.isGift = !self.productItem.isGift
@@ -148,6 +154,11 @@ export default {
     baleOrderItem() {
       let self = this
       self.productItem.isBale = !self.productItem.isBale
+      self.savePorductItem()
+    },
+    deleteOrderItem() {
+      let self = this
+      self.productItem.isDelete = true
       self.savePorductItem()
     },
     savePorductItem() {
