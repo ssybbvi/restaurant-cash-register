@@ -19,16 +19,10 @@ const router = new Router({
       name: 'loyout',
       component: Layout,
       children: [{
-          path: 'tables',
-          component: () => import('./views/tables/Index.vue'),
-          name: 'tables'
-        },
-        {
-          path: 'products',
-          component: () => import('./views/products/Index.vue'),
-          name: 'products'
-        },
-      ]
+        path: 'tables',
+        component: () => import('./views/tables/Index.vue'),
+        name: 'tables'
+      }]
     },
     {
       path: '/about',

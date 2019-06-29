@@ -1,19 +1,74 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
-import restaurant from './modules/restaurant'
+import * as types from './mutation-types'
+import enumerate from '@/filter/enumerate'
+import axios from '../webapi'
 
 Vue.use(Vuex)
 
+
+
+
 const state = {
-    imgPath: "http://uat-training.gzs.com.cn/",
-    filePath: "http://studyfile.gzs.com.cn/"
+    imgPath: "xxx",
+    filePath: "xxxx",
+    currentOrder: {
+        offerPriceItems: [],
+        eventItems: []
+    },
+    productItems: [],
+    currentProductId: '',
+    orderMode: enumerate.orderMode.productProductList,
+    netError: {}
 }
 
 
+const mutations = {
+    [types.CURRENT_ORDER](state, data) {
+        state.currentOrder = data
+    },
+    [types.CURRENT_ITEMS](state, data) {
+        state.productItems = data
+    },
+    [types.SET_ORDER_MODE](state, data) {
+        state.orderMode = data
+    },
+    [types.CURRENT_PRODUCT_ID](state, data) {
+        state.currentProductId = data
+    },
+}
+
+
+const actions = {
+    feachOrderById({
+        commit
+    }) {
+        let orderId = state.route.query.orderId
+        axios.get(`/order/${orderId}`).then(resolve => {
+            commit(types.CURRENT_ORDER, resolve.data.data)
+        }).catch(reject => {
+            commit(types.FETCH_ERROR, reject)
+        })
+
+        axios.get(`/orderItem`, {
+            params: {
+                orderId
+            }
+        }).then(resolve => {
+            commit(types.CURRENT_ITEMS, resolve.data.data)
+        }).catch(reject => {
+            commit(types.FETCH_ERROR, reject)
+        })
+    },
+}
+
+const getters = {
+
+}
+
 export default new Vuex.Store({
     state,
-    modules: {
-        restaurant,
-    }
+    mutations,
+    actions,
+    getters
 })

@@ -129,7 +129,6 @@
 </style>
 <script>
 
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data() {
@@ -149,20 +148,22 @@ export default {
   },
   methods: {
     insertProduc() {
-      restaurantWebApi.createProduct(this.form).then(() => {
+      let self = this
+      self.$http.get("/product", { params: self.form }).then(() => {
         this.defaultForm()
         this.loadProductList()
       })
     },
     updateProduc() {
       let self = this
-      restaurantWebApi.editProduct({ _id: self.formId }, this.form).then(() => {
+      self.$http.put("/product", { data: self.form }, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         this.loadProductList()
       })
     },
     removeProduc() {
-      restaurantWebApi.deleteProduct(this.form).then(() => {
+      let self = this
+      self.$http.delete("/product", { data: { _id: self.formId } }).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
         this.loadProductList()
@@ -194,13 +195,13 @@ export default {
     },
     loadProductList() {
       var self = this
-      restaurantWebApi.fetchProduct().then(resolve => {
+      self.$http.get("/product", { params: {} }).then(resolve => {
         self.productList = resolve.data.data
       })
     },
     loadProductTypeList() {
       var self = this
-      restaurantWebApi.fetchProductType().then(resolve => {
+      self.$http.get("/productType", { params: {} }).then(resolve => {
         self.productTypeList = resolve.data.data
       })
     }

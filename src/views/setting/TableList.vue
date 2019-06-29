@@ -72,10 +72,7 @@
             :label-width="formLabelWidth"
           >
             <el-select
-              v-model="form.label"
-              multiple
-              collapse-tags
-              style="margin-left: 20px;"
+              v-model="form.area"
               placeholder="请选择"
             >
               <el-option
@@ -131,7 +128,6 @@
 </style>
 <script>
 
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data() {
@@ -147,33 +143,35 @@ export default {
   methods: {
     loadTableList() {
       let self = this
-      restaurantWebApi.fetchTables().then(resolve => {
+      self.$http.get("/table", { params: {} }).then(resolve => {
         self.tableList = resolve.data.data
       })
     },
     loadTableAreaList() {
       let self = this
-      restaurantWebApi.fetchTableArea().then(resolve => {
+      self.$http.get("/tableArea", { params: {} }).then(resolve => {
         self.tableAreaList = resolve.data.data
       })
     },
     insertTable() {
       let self = this
-      restaurantWebApi.createTables(this.form).then(() => {
+      self.$http.post("/table", self.form).then(() => {
         this.defaultForm()
         self.loadTableList()
       })
     },
     updateTable() {
       let self = this
-      restaurantWebApi.editTable({ _id: self.formId }, this.form).then(() => {
+      self.$http.put("/table", {
+        params: self.form
+      }, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         self.loadTableList()
       })
     },
     removeTable() {
       let self = this
-      restaurantWebApi.deleteTable(this.form).then(() => {
+      self.$http.delete("/table", { data: { _id: self.formId } }).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
         self.loadTableList()
@@ -198,7 +196,7 @@ export default {
     defaultForm() {
       this.form = {
         name: '',
-        aera: [],
+        area: '',
         defaultSeat: 2
       }
     }

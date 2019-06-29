@@ -18,7 +18,7 @@
         @click="baleOrderItem"
         :class="{'bale':productItem.isBale}"
       >{{productItem.isBale?"取消打包":"打包"}}</el-button>
-      <el-button @click="$emit('set-mode',1)">返回</el-button>
+      <el-button @click="returnOrderItems">返回</el-button>
     </div>
     <div class="product-info">
       <el-form label-width="80px">
@@ -53,7 +53,7 @@
             :closable="remarkEditMode"
             :disable-transitions="false"
             @close="handleCloseRemark(item)"
-            @click="selectRemark(item)"
+            @click="setRemark(item.content)"
           >
             {{item.content}}
           </el-tag>
@@ -93,16 +93,10 @@
 </template>
 
 <script>
-import restaurantApi from '@/webapi/restaurant'
 import * as types from '@/store/mutation-types'
 import enumerate from '@/filter/enumerate'
 
 export default {
-  props: {
-    productItem: {
-      type: Object
-    }
-  },
   data() {
     return {
       productRemark: [],
@@ -111,24 +105,41 @@ export default {
       remarkEditMode: false
     }
   },
+  // watch: {
+  //   "productItem.remark": function (val, oldVal) {
+  //     //let self = this
+  //   }
+  // },
   components: {
   },
+  computed: {
+    productItem() {
+      let self = this
+      return self.$store.state.productItems.find(f => f._id == self.$store.state.currentProductId)
+    }
+  },
   methods: {
+    returnOrderItems() {
+      let self = this
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productProductList)
+    },
     loadRmark() {
       let self = this
-      restaurantApi.fetchRemark({ params: { type: enumerate.remarkType.product } }).then(resolve => {
+      self.$http.get("/remark", { params: { type: enumerate.remarkType.product } }).then(resolve => {
         self.productRemark = resolve.data.data
       })
     },
     showRemarkInput() {
       this.reamrkInputVisible = true;
-      this.$nextTick(_ => {
+      this.$nextTick(() => {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
     handleCloseRemark(remark) {
       let self = this
-      restaurantApi.deleteRemark({ _id: remark._id }).then(resolve => {
+      self.$http.delete("/remark", {
+        data: remark._id
+      }).then(() => {
         self.loadRmark()
       })
     },
@@ -136,48 +147,47 @@ export default {
       let self = this
       let remakContent = this.remakContent;
       if (remakContent) {
-        restaurantApi.createRemark({ type: enumerate.remarkType.product, content: remakContent }).then(resolve => {
+        self.$http.post("/remark", { type: enumerate.remarkType.product, content: remakContent }).then(() => {
           self.loadRmark()
         })
       }
       this.reamrkInputVisible = false;
       this.remakContent = '';
     },
-    selectRemark(remark) {
+    setRemark(content) {
       let self = this
-      self.productItem.remark = self.productItem.remark + remark.content
-      self.savePorductItem()
+      self.savePorductItem({ remark: self.productItem.remark + content })
     },
     giftOrderItem() {
       let self = this
-      self.productItem.isGift = !self.productItem.isGift
-      self.savePorductItem()
+      self.savePorductItem({ isGift: !self.productItem.isGift })
     },
     timeOutOrderItem() {
       let self = this
-      self.productItem.isExpedited = false
-      self.productItem.isTimeout = !self.productItem.isTimeout
-      self.savePorductItem()
+      self.savePorductItem({ isTimeout: !self.productItem.isTimeout })
     },
     expediteOrderItem() {
       let self = this
-      self.productItem.isTimeout = false
-      self.productItem.isExpedited = !self.productItem.isExpedited
-      self.savePorductItem()
+      self.savePorductItem({ isExpedited: !self.productItem.isExpedited })
     },
     baleOrderItem() {
       let self = this
-      self.productItem.isBale = !self.productItem.isBale
-      self.savePorductItem()
+      self.savePorductItem({ isBale: !self.productItem.isBale })
     },
     deleteOrderItem() {
       let self = this
-      self.productItem.isDelete = true
-      self.savePorductItem()
+      let orderItemId = self.$store.state.currentProductId
+      self.$http.delete("/orderItem", { data: { _id: orderItemId } }).then(() => {
+        self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productProductList)
+        self.$store.dispatch("feachOrderById")
+      })
     },
-    savePorductItem() {
+    savePorductItem(updateBody) {
       let self = this
-      self.$emit("update-product-item", self.productItem)
+      let orderItemId = self.$store.state.currentProductId
+      self.$http.put(`/orderItem?_id=${orderItemId}`, updateBody).then(() => {
+        self.$store.dispatch("feachOrderById")
+      })
     }
   },
   mounted() {

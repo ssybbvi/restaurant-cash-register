@@ -30,7 +30,6 @@
 <script>
 import Search from '@/components/comm/Search.vue'
 import MinorMenus from '@/components/comm/MinorMenus.vue'
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data: function () {
@@ -57,13 +56,13 @@ export default {
     },
     loadProductList() {
       var self = this
-      restaurantWebApi.fetchProduct().then(resolve => {
+      self.$http.get("/product", { params: {} }).then(resolve => {
         self.productList = resolve.data.data
       })
     },
     loadProductTypeList() {
       var self = this
-      restaurantWebApi.fetchProductType().then(resolve => {
+      self.$http.get("/productType", { params: {} }).then(resolve => {
         self.productTypeList = resolve.data.data
       })
     }

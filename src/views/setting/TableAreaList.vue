@@ -54,7 +54,7 @@
             type="danger"
             round
             @click="removeTableArea(form)"
-            v-if="tableTableId"
+            v-if="formId"
           >删除桌面</el-button>
           <el-button
             type="primary"
@@ -88,14 +88,13 @@
 </style>
 <script>
 
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data() {
     return {
       tableAreaList: [],
       dialogFormVisible: false,
-      tableTableId: "",
+      formId: "",
       form: {
         name: ''
       },
@@ -105,27 +104,27 @@ export default {
   methods: {
     loadTableArea() {
       let self = this
-      restaurantWebApi.fetchTableArea().then(resolve => {
+      self.$http.get("/tableArea").then(resolve => {
         self.tableAreaList = resolve.data.data
       })
     },
     insertTableArea() {
       let self = this
-      restaurantWebApi.createTableArea(this.form).then(() => {
+      self.$http.post("/tableArea", self.form).then(() => {
         this.defaultForm()
         this.loadTableArea()
       })
     },
     updateTableArea() {
       let self = this
-      restaurantWebApi.editTableArea({ _id: self.tableTableId }, this.form).then(() => {
+      self.$http.put("/tableArea", { data: self.form }, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         this.loadTableArea()
       })
     },
     removeTableArea() {
       let self = this
-      restaurantWebApi.deleteTableArea(this.form).then(() => {
+      self.$http.delete("/tableArea", { data: { _id: self.formId } }).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
         this.loadTableArea()
@@ -135,12 +134,12 @@ export default {
       this.dialogFormVisible = true
     },
     openEditDialog(item) {
-      this.tableTableId = item._id
+      this.formId = item._id
       this.form = item
       this.dialogFormVisible = true
     },
     save() {
-      if (this.tableTableId) {
+      if (this.formId) {
         this.updateTableArea()
       } else {
         this.insertTableArea()

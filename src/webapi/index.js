@@ -2,6 +2,9 @@ import axios from "axios"
 import {
     getToken
 } from "./tool"
+import {
+    Message
+} from "element-ui";
 
 const DevBaseUrl = "http://127.0.0.1:3000"
 const ProdBashUrl = "https://xxx.xxx"
@@ -17,10 +20,12 @@ if (token) {
     }
 }
 
+
+
 let request = axios.create(config)
 
 // http request 拦截器
-axios.interceptors.request.use(
+request.interceptors.request.use(
     config => {
         if (window) {
             let token = getToken()
@@ -30,7 +35,7 @@ axios.interceptors.request.use(
             }
         }
         // if (config.method === 'get') {
-        //   config.url = config.url + 'timestamp=' + Date.now().toString()
+        //     config.url = config.url + 'timestamp=' + Date.now().toString()
         // }
         return config
     },
@@ -38,5 +43,25 @@ axios.interceptors.request.use(
         return Promise.reject(err)
     }
 )
+
+request.interceptors.response.use(function (response) {
+    // Do something with response data
+    if (response.data.result === false) {
+        Message({
+            showClose: true,
+            message: response.data.data,
+            type: "error"
+        });
+    }
+    return Promise.resolve(response);
+}, function (error) {
+    Message({
+        showClose: true,
+        message: error,
+        type: "error"
+    });
+    return Promise.reject(error);
+});
+
 
 export default request

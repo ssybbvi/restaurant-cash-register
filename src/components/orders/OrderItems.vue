@@ -1,11 +1,11 @@
 <template>
   <div id="order">
     <ul class="info">
-      <li>{{order.tableAreaName}}</li>
-      <li>{{order.tableName}}</li>
+      <li>{{$store.state.currentOrder.tableAreaName}}</li>
+      <li>{{$store.state.currentOrder.tableName}}</li>
       <li>
         <i class="icon-time fs22"></i>
-        <span>{{order.startDataTime|spendTime}}</span>
+        <span>{{$store.state.currentOrder.startDataTime|spendTime}}</span>
       </li>
     </ul>
     <div class="orderItems">
@@ -96,39 +96,25 @@
         </ul>
       </draggable>
       <ul class="summary">
-        <li>总金额:￥{{order.totalPrice}}</li>
+        <li>总金额:￥{{$store.state.currentOrder.totalPrice}}</li>
       </ul>
     </div>
 
     <div class="foot">
       <el-button
-        @click="$emit('order-make')"
+        @click="orderMake"
         :disabled="orderMakeStatus"
       >下单到厨房</el-button>
-      <el-button @click="$emit('set-mode',3)">开始结算</el-button>
+      <el-button @click="settlement">开始结算</el-button>
     </div>
   </div>
 </template>
 <script>
 import Draggable from 'vuedraggable'
 import * as types from "@/store/mutation-types"
-import restaurantApi from '@/webapi/restaurant'
 import enumerate from '@/filter/enumerate'
 
-
 export default {
-  props: {
-    order: {
-      type: Object,
-      default() {
-        return {
-          productItems: [],
-          offerPriceItems: [],
-          eventItems: []
-        }
-      }
-    }
-  },
   data: function () {
     return {
 
@@ -138,12 +124,20 @@ export default {
     Draggable,
   },
   methods: {
-    menuSelect() {
-
+    orderMake() {
+      let self = this
+      self.$http.put("/orderMake", { orderId: self.$store.state.currentOrder._id }).then(() => {
+        self.$store.dispatch("feachOrderById")
+      })
+    },
+    settlement() {
+      let self = this
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.settlement)
     },
     selectedOrderItem(item) {
       let self = this
-      self.$emit("selected-order-item", item)
+      self.$store.commit(types.CURRENT_PRODUCT_ID, item._id)
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productItemInfo)
     },
     orderItemClass(item) {
       if (item.status == enumerate.productStatus.normal) {
@@ -158,23 +152,21 @@ export default {
       return ""
     },
     orderProductSort() {
-      let self = this
-      console.log(this.order)
     }
   },
   computed: {
     nomalProductList() {
-      return this.order.productItems.filter(f => f.status == enumerate.productStatus.normal)
+      return this.$store.state.productItems.filter(f => f.status == enumerate.productStatus.normal)
     },
     cookingProductList() {
-      return this.order.productItems.filter(f => f.status == enumerate.productStatus.cooking)
+      return this.$store.state.productItems.filter(f => f.status == enumerate.productStatus.cooking)
     },
     orderMakeStatus() {
-      return !this.order.productItems.some(f => f.status == enumerate.productStatus.normal)
+      return !this.$store.state.productItems.some(f => f.status == enumerate.productStatus.normal)
     }
   },
   mounted() {
-    //var self = this
+
   }
 }
 </script>

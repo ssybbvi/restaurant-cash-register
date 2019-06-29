@@ -54,7 +54,7 @@
             type="danger"
             round
             @click="removeProductType(form)"
-            v-if="tableTableId"
+            v-if="formId"
           >删除</el-button>
           <el-button
             type="primary"
@@ -88,14 +88,13 @@
 </style>
 <script>
 
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data() {
     return {
       tableAreaList: [],
       dialogFormVisible: false,
-      tableTableId: "",
+      formId: "",
       form: {
         name: ''
       },
@@ -105,27 +104,27 @@ export default {
   methods: {
     loadProductType() {
       let self = this
-      restaurantWebApi.fetchProductType().then(resolve => {
+      self.$http.get("/productType", { params: {} }).then(resolve => {
         self.tableAreaList = resolve.data.data
       })
     },
     insertProductType() {
       let self = this
-      restaurantWebApi.createProductType(this.form).then(() => {
+      self.$http.post("/productType", self.form).then(() => {
         this.defaultForm()
         this.loadProductType()
       })
     },
     updateProductType() {
       let self = this
-      restaurantWebApi.editProductType({ _id: self.tableTableId }, this.form).then(() => {
+      self.$http.put("/productType", self.form, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         this.loadProductType()
       })
     },
     removeProductType() {
       let self = this
-      restaurantWebApi.deleteProductType(this.form).then(() => {
+      self.$http.delete("/productType", { data: { _id: self.form._id } }).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
         this.loadProductType()
@@ -135,12 +134,12 @@ export default {
       this.dialogFormVisible = true
     },
     openEditDialog(item) {
-      this.tableTableId = item._id
+      this.formId = item._id
       this.form = item
       this.dialogFormVisible = true
     },
     save() {
-      if (this.tableTableId) {
+      if (this.formId) {
         this.updateProductType()
       } else {
         this.insertProductType()

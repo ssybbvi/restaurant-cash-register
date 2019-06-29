@@ -80,7 +80,6 @@
 </template>
 <script>
 import MinorMenus from '@/components/comm/MinorMenus.vue'
-import restaurantWebApi from '@/webapi/restaurant'
 
 export default {
   data() {
@@ -103,7 +102,7 @@ export default {
     tableListWithAreaId() {
       let self = this
       if (self.currentArea) {
-        return self.tableList.filter(f => f.label.some(s => s == self.currentArea))
+        return self.tableList.filter(f => f.area === self.currentArea)
       } else {
         return self.tableList
       }
@@ -124,19 +123,19 @@ export default {
     openTable() {
       let self = this
       self.dialogFormVisible = false
-      restaurantWebApi.openTable(this.form).then(resolve => {
+      self.$http.post("/opentable", this.form).then(resolve => {
         self.$router.push({ name: "shoppingcart", query: { orderId: resolve.data.data._id } })
       })
     },
     loadTableList() {
       let self = this
-      restaurantWebApi.fetchTables().then(resolve => {
+      self.$http.get("/table").then(resolve => {
         self.tableList = resolve.data.data
       })
     },
     loadTableAreaList() {
       let self = this
-      restaurantWebApi.fetchTableArea().then(resolve => {
+      self.$http.get("/tableArea").then(resolve => {
         self.tableAreaList = resolve.data.data
       })
     },
