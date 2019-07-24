@@ -1,3 +1,5 @@
+import base64url from "base64url"
+
 // 写 cookies
 export let setCookie = function setCookie(name, value, time) {
     if (time) {
@@ -77,3 +79,14 @@ export let delToken = function () {
         delCookie("Bearer");
     }
 };
+
+export let getUserInfo = function () {
+    let token = getToken()
+    if (!token) {
+        return null
+    }
+
+    let userInfoToken = token.split(".")[1]
+    let result = base64url.decode(userInfoToken)
+    return JSON.parse(result)
+}

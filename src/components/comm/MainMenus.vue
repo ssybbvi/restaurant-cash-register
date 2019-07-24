@@ -2,28 +2,22 @@
   <aside>
     <nav>
       <ul>
-        <router-link
-          to="/tables"
-          tag="li"
-        >
+        <router-link to="/tables"
+                     tag="li">
           <i class="icon-table"></i>
           <span>桌面</span>
         </router-link>
-        <router-link
-          to="/orders/list"
-          tag="li"
-        >
+        <router-link to="/orders/list"
+                     tag="li">
           <i class="icon-food"></i>
           <span>订单</span>
         </router-link>
-        <!-- <router-link
-          to="/queues"
-          tag="li"
-        >
+        <router-link to="/scheduling/index"
+                     tag="li">
           <i class="icon-building"></i>
-          <span>排队</span>
+          <span>调度</span>
         </router-link>
-        <router-link
+        <!-- <router-link
           to="/takeaways/list"
           tag="li"
         >
@@ -39,10 +33,8 @@
           <i class="icon-bell"></i>
           <span>消息</span>
         </li> -->
-        <router-link
-          to="/setting/home"
-          tag="li"
-        >
+        <router-link to="/setting/home"
+                     tag="li">
           <i class="icon-cog"></i>
           <span>设置</span>
         </router-link>

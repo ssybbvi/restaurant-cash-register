@@ -2,7 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Layout from './views/Layout.vue'
 import Home from './views/Home.vue'
+import Login from './views/auth/Login.vue'
 
+
+import {
+  getUserInfo
+} from "./webapi/tool"
 Vue.use(Router)
 
 
@@ -10,10 +15,16 @@ const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [{
+      path: '/login',
+      name: 'login',
+      component: Login,
+    },
+    {
       path: '/',
-      name: 'Home',
+      name: 'home',
       component: Home,
     },
+
     {
       path: '/',
       name: 'loyout',
@@ -57,6 +68,11 @@ const router = new Router({
           path: '/setting/product-type-list',
           name: 'setting-product-type-list',
           component: () => import('./views/setting/ProductTypeList.vue'),
+        },
+        {
+          path: '/setting/user-list',
+          name: 'setting-user-list',
+          component: () => import('./views/setting/UserList.vue'),
         }
       ]
     },
@@ -74,17 +90,39 @@ const router = new Router({
         component: () => import('@/views/orders/List.vue'),
         name: 'order-list'
       }]
-    }
-
-
-
-
+    },
+    {
+      path: '/scheduling',
+      name: 'scheduling',
+      component: Layout,
+      children: [{
+        path: 'index',
+        component: () => import('@/views/scheduling/Index.vue'),
+        name: 'scheduling-index'
+      }, {
+        path: 'demo',
+        component: () => import('@/views/scheduling/Demo.vue'),
+        name: 'scheduling-demo'
+      }]
+    },
   ]
 })
 
 
-router.beforeEach((to, from, next) => {
-  next()
-})
+// router.beforeEach((to, from, next) => {
+//   if (to.name == "login") {
+//     next()
+//     return
+//   }
+
+//   let userInfo = getUserInfo()
+//   if (!userInfo) {
+//     next({
+//       name: 'login'
+//     })
+//     return
+//   }
+//   next()
+// })
 
 export default router

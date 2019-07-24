@@ -117,7 +117,7 @@ export default {
     },
     updateTableArea() {
       let self = this
-      self.$http.put("/tableArea", { data: self.form }, { params: { _id: self.formId } }).then(() => {
+      self.$http.put("/tableArea", self.form, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         this.loadTableArea()
       })
@@ -144,12 +144,13 @@ export default {
       } else {
         this.insertTableArea()
       }
-      this.dialogFormVisible = false
+
     },
     defaultForm() {
       this.form = {
         name: ''
       }
+      this.dialogFormVisible = false
     }
   },
   mounted() {

@@ -156,7 +156,7 @@ export default {
     },
     updateProduc() {
       let self = this
-      self.$http.put("/product", { data: self.form }, { params: { _id: self.formId } }).then(() => {
+      self.$http.put("/product", self.form, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
         this.loadProductList()
       })
@@ -183,7 +183,7 @@ export default {
       } else {
         this.insertProduc()
       }
-      this.dialogFormVisible = false
+
     },
     defaultForm() {
       this.form = {
@@ -192,6 +192,7 @@ export default {
         label: [],
         stock: 0
       }
+      this.dialogFormVisible = false
     },
     loadProductList() {
       var self = this

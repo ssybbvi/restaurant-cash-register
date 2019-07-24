@@ -63,7 +63,7 @@ export default {
     }
   },
   mounted() {
-    var self = this
+    //var self = this
   }
 }
 </script>

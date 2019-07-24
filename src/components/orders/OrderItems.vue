@@ -5,95 +5,32 @@
       <li>{{$store.state.currentOrder.tableName}}</li>
       <li>
         <i class="icon-time fs22"></i>
-        <span>{{$store.state.currentOrder.startDataTime|spendTime}}</span>
+        <span>{{$store.state.currentOrder.startDateTime|spendTime}}</span>
       </li>
     </ul>
     <div class="orderItems">
-      <!-- <span >
-        <ul
-          @click="selectedOrderItem(item)"
-          v-for="item in otherProductList "
-          :key="item._id"
-        >
-          <li :class="orderItemClass(item)">{{item.name}}</li>
-          <li>
-            <span>￥{{item.price}}</span>
-            <span
-              v-show="item.isGift"
-              class="gift"
-            ></span>
-            <span
-              v-show="item.isTimeout"
-              class="time-out"
-            ></span>
-            <span
-              v-show="item.isExpedited"
-              class="expedited"
-            ></span>
-            <span
-              v-show="item.isBale"
-              class="bale"
-            ></span>
-          </li>
-        </ul>
-      </span> -->
-      <draggable @sort="orderProductSort">
-        <ul
-          @click="selectedOrderItem(item)"
-          v-for="item in cookingProductList "
-          :key="item._id"
-        >
-          <li :class="orderItemClass(item)">{{item.name}}</li>
-          <li>
-            <span>￥{{item.price}}</span>
-            <span
-              v-show="item.isGift"
-              class="gift"
-            ></span>
-            <span
-              v-show="item.isTimeout"
-              class="time-out"
-            ></span>
-            <span
-              v-show="item.isExpedited"
-              class="expedited"
-            ></span>
-            <span
-              v-show="item.isBale"
-              class="bale"
-            ></span>
-            <span class="highlighted-order-item"></span>
-          </li>
-        </ul>
-      </draggable>
-      <draggable @sort="orderProductSort">
-        <ul
-          @click="selectedOrderItem(item)"
-          v-for="item in nomalProductList"
-          :key="item._id"
-        >
-          <li :class="orderItemClass(item)">{{item.name}}</li>
-          <li>
-            <span>￥{{item.price}}</span>
-            <span
-              v-show="item.isGift"
-              class="gift"
-            ></span>
-            <span
-              v-show="item.isTimeout"
-              class="time-out"
-            ></span>
-            <span
-              v-show="item.isExpedited"
-              class="expedited"
-            ></span>
-            <span
-              v-show="item.isBale"
-              class="bale"
-            ></span>
-            <span class="highlighted-order-item"></span>
-          </li>
-        </ul>
+      <draggable v-model="$store.state.productItems"
+                 @end="endDraggable">
+        <transition-group type="transition"
+                          :name="'flip-list'">
+          <ul @click="selectedOrderItem(item)"
+              v-for="item in $store.state.productItems"
+              :key="item._id">
+            <li :class="orderItemClass(item)">{{item.name}}</li>
+            <li>
+              <span>￥{{item.price}}</span>
+              <span v-show="item.isGift"
+                    class="gift"></span>
+              <span v-show="item.isTimeout"
+                    class="time-out"></span>
+              <span v-show="item.isExpedited"
+                    class="expedited"></span>
+              <span v-show="item.isBale"
+                    class="bale"></span>
+              <span class="highlighted-order-item"></span>
+            </li>
+          </ul>
+        </transition-group>
       </draggable>
       <ul class="summary">
         <li>总金额:￥{{$store.state.currentOrder.totalPrice}}</li>
@@ -101,10 +38,8 @@
     </div>
 
     <div class="foot">
-      <el-button
-        @click="orderMake"
-        :disabled="orderMakeStatus"
-      >下单到厨房</el-button>
+      <el-button @click="orderMake"
+                 :disabled="!$store.state.productItems.some(f => f.status === $Enumerate.productStatus.normal)">下单到厨房</el-button>
       <el-button @click="settlement">开始结算</el-button>
     </div>
   </div>
@@ -112,7 +47,6 @@
 <script>
 import Draggable from 'vuedraggable'
 import * as types from "@/store/mutation-types"
-import enumerate from '@/filter/enumerate'
 
 export default {
   data: function () {
@@ -128,42 +62,40 @@ export default {
       let self = this
       self.$http.put("/orderMake", { orderId: self.$store.state.currentOrder._id }).then(() => {
         self.$store.dispatch("feachOrderById")
+        self.$http.post("/scheduling/loadOrderItemToWaitCookQueues")
       })
     },
     settlement() {
       let self = this
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.settlement)
+      self.$store.commit(types.SET_ORDER_MODE, self.$Enumerate.orderMode.settlement)
     },
     selectedOrderItem(item) {
       let self = this
       self.$store.commit(types.CURRENT_PRODUCT_ID, item._id)
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productItemInfo)
+      self.$store.commit(types.SET_ORDER_MODE, self.$Enumerate.orderMode.productItemInfo)
     },
     orderItemClass(item) {
-      if (item.status == enumerate.productStatus.normal) {
+      let self = this
+      if (item.status == self.$Enumerate.productStatus.normal) {
         return "order-items"
       }
-      if (item.status == enumerate.productStatus.cooking) {
+      if (item.status == self.$Enumerate.productStatus.cooking) {
         return "order-items-ing"
       }
-      if (item.status == enumerate.productStatus.finish) {
+      if (item.status == self.$Enumerate.productStatus.finish) {
         return "order-items-finish"
       }
       return ""
     },
-    orderProductSort() {
-    }
-  },
-  computed: {
-    nomalProductList() {
-      return this.$store.state.productItems.filter(f => f.status == enumerate.productStatus.normal)
+    endDraggable() {
+      console.log(this.$store.state.productItems)
     },
-    cookingProductList() {
-      return this.$store.state.productItems.filter(f => f.status == enumerate.productStatus.cooking)
-    },
-    orderMakeStatus() {
-      return !this.$store.state.productItems.some(f => f.status == enumerate.productStatus.normal)
-    }
+    // onMove({ relatedContext, draggedContext }) {
+    //   let self = this
+    //   const relatedElement = relatedContext.element;
+    //   const draggedElement = draggedContext.element;
+    //   return relatedElement.status !== self.$Enumerate.productStatus.finish && draggedElement.status !== self.$Enumerate.productStatus.finish
+    // }
   },
   mounted() {
 
@@ -173,22 +105,22 @@ export default {
 
 <style scoped lang="scss">
 .gift {
-  background-color: #13ce66;
+  background-color: #2ecc71;
   color: white;
 }
 
 .time-out {
-  background-color: #20a0ff;
+  background-color: #3498db;
   color: white;
 }
 
 .expedited {
-  background-color: #ff4949;
+  background-color: #e74c3c;
   color: white;
 }
 
 .bale {
-  background-color: #f7ba2a;
+  background-color: #f39c12;
   color: white;
 }
 
@@ -227,13 +159,13 @@ export default {
         display: flex;
         justify-content: center;
         &.order-items {
-          color: #13ce66;
+          color: #2ecc71;
         }
         &.order-items-ing {
-          color: #f7ba2a;
+          color: #f1c40f;
         }
         &.order-items-finish {
-          color: #ff4949;
+          color: #e74c3c;
         }
         height: 100%;
         display: flex;

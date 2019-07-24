@@ -4,6 +4,7 @@
     <input
       type="text"
       placeholder="搜索"
+      v-model="keyword"
     />
   </div>
 </template>
@@ -33,7 +34,17 @@
 </style>
 <script>
 export default {
-
+  data() {
+    return {
+      keyword: ""
+    }
+  },
+  watch: {
+    keyword() {
+      let self = this
+      self.$emit("search-keyword", self.keyword)
+    }
+  }
 }
 
 </script>

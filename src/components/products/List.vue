@@ -1,10 +1,10 @@
 <template>
   <div id="container">
     <div class="product-list">
-      <search></search>
+      <search @search-keyword="setKeyWord"></search>
       <ul>
         <li
-          v-for="item in productListByType"
+          v-for="item in productListByFilter"
           @click="$emit('selected',item)"
           :key="item.id"
         >
@@ -36,18 +36,24 @@ export default {
     return {
       productList: [],
       productTypeList: [],
-      currentType: ""
+      currentType: "",
+      keyword: ""
     }
   },
   computed: {
-    productListByType() {
+    productListByFilter() {
       let self = this
+      let list = self.productList
       if (self.currentType) {
-        return self.productList.filter(f => f.label.some(s => s == self.currentType))
-      } else {
-        return self.productList
+        list = self.productList.filter(f => f.label.some(s => s == self.currentType))
       }
-    }
+
+      if (self.keyword) {
+        list = self.productList.filter(f => f.name.indexOf(self.keyword) > -1)
+      }
+
+      return list
+    },
   },
   methods: {
     switchMenu(parameter) {
@@ -65,6 +71,10 @@ export default {
       self.$http.get("/productType", { params: {} }).then(resolve => {
         self.productTypeList = resolve.data.data
       })
+    },
+    setKeyWord(keyWord) {
+      let self = this
+      self.keyword = keyWord
     }
   },
   components: {

@@ -2,22 +2,14 @@
   <section>
     <div class="product-status">
       <el-button @click="deleteOrderItem">删除</el-button>
-      <el-button
-        @click="giftOrderItem"
-        :class="{'gift':productItem.isGift}"
-      >{{productItem.isGift?"取消赠菜":"赠菜"}}</el-button>
-      <el-button
-        @click="timeOutOrderItem"
-        :class="{'time-out':productItem.isTimeout}"
-      >{{productItem.isTimeout?"取消暂停":"暂停"}}</el-button>
-      <el-button
-        @click="expediteOrderItem"
-        :class="{'expedited':productItem.isExpedited}"
-      >{{productItem.isExpedited?"取消加急":"加急"}}</el-button>
-      <el-button
-        @click="baleOrderItem"
-        :class="{'bale':productItem.isBale}"
-      >{{productItem.isBale?"取消打包":"打包"}}</el-button>
+      <el-button @click="giftOrderItem"
+                 :class="{'gift':productItem.isGift}">{{productItem.isGift?"取消赠菜":"赠菜"}}</el-button>
+      <el-button @click="timeOutOrderItem"
+                 :class="{'time-out':productItem.isTimeout}">{{productItem.isTimeout?"取消暂停":"暂停"}}</el-button>
+      <el-button @click="expediteOrderItem"
+                 :class="{'expedited':productItem.isExpedited}">{{productItem.isExpedited?"取消加急":"加急"}}</el-button>
+      <el-button @click="baleOrderItem"
+                 :class="{'bale':productItem.isBale}">{{productItem.isBale?"取消打包":"打包"}}</el-button>
       <el-button @click="returnOrderItems">返回</el-button>
     </div>
     <div class="product-info">
@@ -25,67 +17,51 @@
         <el-form-item label="菜名">
           {{productItem.name}}
         </el-form-item>
-        <el-form-item
-          label="数量"
-          v-if="false"
-        >
+        <el-form-item label="数量"
+                      v-if="false">
           <span id="quantity">
-            <el-input-number
-              v-model="productItem.quantity"
-              @change="savePorductItem"
-              :min="0"
-              :max="10"
-            ></el-input-number>
+            <el-input-number v-model="productItem.quantity"
+                             @change="savePorductItem"
+                             :min="0"
+                             :max="10"></el-input-number>
           </span>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input
-            type="textarea"
-            :rows="2"
-            placeholder="请输入内容"
-            v-model="productItem.remark"
-          > </el-input>
+          <el-input type="textarea"
+                    :rows="2"
+                    placeholder="请输入内容"
+                    v-model="productItem.remark"> </el-input>
         </el-form-item>
         <el-form-item label="">
-          <el-tag
-            :key="item._id"
-            v-for="item in productRemark"
-            :closable="remarkEditMode"
-            :disable-transitions="false"
-            @close="handleCloseRemark(item)"
-            @click="setRemark(item.content)"
-          >
+          <el-tag :key="item._id"
+                  v-for="item in productRemark"
+                  :closable="remarkEditMode"
+                  :disable-transitions="false"
+                  @close="handleCloseRemark(item)"
+                  @click="setRemark(item.content)">
             {{item.content}}
           </el-tag>
-          <el-input
-            class="input-new-tag"
-            v-if="reamrkInputVisible"
-            v-model="remakContent"
-            ref="saveTagInput"
-            size="small"
-            @keyup.enter.native="inputConfirmRemark"
-            @blur="inputConfirmRemark"
-          >
+          <el-input class="input-new-tag"
+                    v-if="reamrkInputVisible"
+                    v-model="remakContent"
+                    ref="saveTagInput"
+                    size="small"
+                    @keyup.enter.native="inputConfirmRemark"
+                    @blur="inputConfirmRemark">
           </el-input>
-          <el-button
-            v-else
-            v-show="remarkEditMode"
-            class="button-new-tag"
-            size="small"
-            @click="showRemarkInput"
-          >创建快速备注</el-button>
-          <i
-            v-if="remarkEditMode"
-            @click="remarkEditMode=!remarkEditMode"
-            class="el-icon-s-tools"
-            style="font-size:24px;margin-left:10px;position: relative;top: 4px;"
-          ></i>
-          <i
-            v-if="!remarkEditMode"
-            @click="remarkEditMode=!remarkEditMode"
-            class="el-icon-setting"
-            style="font-size:24px;margin-left:10px;position: relative;top: 4px;"
-          ></i>
+          <el-button v-else
+                     v-show="remarkEditMode"
+                     class="button-new-tag"
+                     size="small"
+                     @click="showRemarkInput">创建快速备注</el-button>
+          <i v-if="remarkEditMode"
+             @click="remarkEditMode=!remarkEditMode"
+             class="el-icon-s-tools"
+             style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
+          <i v-if="!remarkEditMode"
+             @click="remarkEditMode=!remarkEditMode"
+             class="el-icon-setting"
+             style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
         </el-form-item>
       </el-form>
     </div>
@@ -105,11 +81,6 @@ export default {
       remarkEditMode: false
     }
   },
-  // watch: {
-  //   "productItem.remark": function (val, oldVal) {
-  //     //let self = this
-  //   }
-  // },
   components: {
   },
   computed: {
@@ -121,7 +92,7 @@ export default {
   methods: {
     returnOrderItems() {
       let self = this
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productProductList)
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
     },
     loadRmark() {
       let self = this
@@ -178,8 +149,11 @@ export default {
       let self = this
       let orderItemId = self.$store.state.currentProductId
       self.$http.delete("/orderItem", { data: { _id: orderItemId } }).then(() => {
-        self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productProductList)
+        self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
         self.$store.dispatch("feachOrderById")
+        if (self.productItem.state === self.$Enumerate.productStatus.waitCooking) {
+          self.$http.post("/scheduling/deleteWaitCookQueueChefOrderItem")
+        }
       })
     },
     savePorductItem(updateBody) {
@@ -212,22 +186,22 @@ section {
     margin: 10px 10px;
   }
   .gift {
-    background-color: #13ce66;
+    background-color: #2ecc71;
     color: white;
   }
 
   .time-out {
-    background-color: #20a0ff;
+    background-color: #3498db;
     color: white;
   }
 
   .expedited {
-    background-color: #ff4949;
+    background-color: #e74c3c;
     color: white;
   }
 
   .bale {
-    background-color: #f7ba2a;
+    background-color: #f39c12;
     color: white;
   }
 }

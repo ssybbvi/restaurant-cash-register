@@ -27,6 +27,12 @@
         >
           菜品类型管理
         </router-link>
+        <router-link
+          to="/setting/user-list"
+          tag="li"
+        >
+          员工
+        </router-link>
       </ul>
     </div>
   </div>
@@ -54,7 +60,6 @@ export default {
     return {}
   },
   mounted() {
-    console.log("123")
   }
 }
 </script>

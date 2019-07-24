@@ -1,10 +1,8 @@
 <template>
   <section>
     <order-items ref="orderItems"></order-items>
-    <product-list
-      @selected="selectedProduct"
-      v-if="$store.state.orderMode==$Enumerate.orderMode.productProductList"
-    ></product-list>
+    <product-list @selected="selectedProduct"
+                  v-if="$store.state.orderMode==$Enumerate.orderMode.productList"></product-list>
     <order-item-info v-if="$store.state.orderMode==$Enumerate.orderMode.productItemInfo"></order-item-info>
     <settlement v-if="$store.state.orderMode==$Enumerate.orderMode.settlement"></settlement>
   </section>
@@ -63,6 +61,7 @@ export default {
   mounted() {
     let self = this
     self.$store.dispatch("feachOrderById")
+    self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
   }
 }
 </script>

@@ -9,23 +9,18 @@
     </div>
     <div id="body">
       <el-table
-        :data="tableList"
+        :data="userList"
         stripe
         style="width: 100%"
       >
         <el-table-column
           prop="name"
-          label="桌号"
+          label="姓名"
         >
         </el-table-column>
         <el-table-column
-          prop="defaultSeat"
-          label="默认桌位数"
-        >
-        </el-table-column>
-        <el-table-column
-          prop="label"
-          label="所属区域"
+          prop="phoneNumber"
+          label="手机号码"
         >
         </el-table-column>
         <el-table-column
@@ -42,12 +37,12 @@
         </el-table-column>
       </el-table>
       <el-dialog
-        title="桌面"
+        title="员工信息"
         :visible.sync="dialogFormVisible"
       >
         <el-form>
           <el-form-item
-            label="桌号"
+            label="姓名"
             :label-width="formLabelWidth"
           >
             <el-input
@@ -56,35 +51,66 @@
             ></el-input>
           </el-form-item>
           <el-form-item
-            label="默认座位数"
+            label="手机号码"
             :label-width="formLabelWidth"
           >
-            <el-input-number
-              v-model="form.defaultSeat"
-              :min="1"
-              :max="10"
-              label="描述文字"
-            ></el-input-number>
+            <el-input
+              v-model="form.phoneNumber"
+              label=""
+            >
+            </el-input>
           </el-form-item>
-
           <el-form-item
-            label="标签"
+            label="密码"
+            :label-width="formLabelWidth"
+          >
+            <el-input
+              show-password
+              v-model="form.password"
+              label=""
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item
+            label="备注"
+            :label-width="formLabelWidth"
+          >
+            <el-input
+              type="textarea"
+              v-model="form.remarks"
+              label=""
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item
+            label="岗位"
             :label-width="formLabelWidth"
           >
             <el-select
-              v-model="form.area"
+              v-model="form.userType"
               placeholder="请选择"
+              multiple
             >
               <el-option
-                v-for="item in tableAreaList"
+                v-for="item in userTypeList"
                 :key="item._id"
                 :label="item.name"
-                :value="item.name"
+                :value="item._id"
               >
               </el-option>
             </el-select>
           </el-form-item>
-
+          <el-form-item
+            label="是否启用"
+            :label-width="formLabelWidth"
+          >
+            <el-switch
+              v-model="form.isEnable"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+          </el-form-item>
         </el-form>
         <div
           slot="footer"
@@ -93,9 +119,9 @@
           <el-button
             type="danger"
             round
-            @click="removeTable(form)"
+            @click="removeUser(form)"
             v-if="formId"
-          >删除桌面</el-button>
+          >删除</el-button>
           <el-button
             type="primary"
             @click="save()"
@@ -133,48 +159,42 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
-      tableList: [],
-      tableAreaList: [],
+      userList: [],
       formId: "",
       form: {
 
       },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      userTypeList: []
     }
   },
   methods: {
-    loadTableList() {
+    loadUserList() {
       let self = this
-      self.$http.get("/table", { params: {} }).then(resolve => {
-        self.tableList = resolve.data.data
+      self.$http.get("/user", { params: {} }).then(resolve => {
+        self.userList = resolve.data.data
       })
     },
-    loadTableAreaList() {
+    insertUser() {
       let self = this
-      self.$http.get("/tableArea", { params: {} }).then(resolve => {
-        self.tableAreaList = resolve.data.data
-      })
-    },
-    insertTable() {
-      let self = this
-      self.$http.post("/table", self.form).then(() => {
+      self.$http.post("/user", self.form).then(() => {
         self.defaultForm()
-        self.loadTableList()
+        self.loadUserList()
       })
     },
-    updateTable() {
+    updateUser() {
       let self = this
-      self.$http.put("/table", self.form, { params: { _id: self.formId } }).then(() => {
+      self.$http.put("/user", self.form, { params: { _id: self.formId } }).then(() => {
         this.defaultForm()
-        self.loadTableList()
+        self.loadUserList()
       })
     },
-    removeTable() {
+    removeUser() {
       let self = this
-      self.$http.delete("/table", { data: { _id: self.formId } }).then(() => {
+      self.$http.delete("/user", { data: { _id: self.formId } }).then(() => {
         this.dialogFormVisible = false
         this.defaultForm()
-        self.loadTableList()
+        self.loadUserList()
       })
     },
     openCreateDialog() {
@@ -187,9 +207,9 @@ export default {
     },
     save() {
       if (this.formId) {
-        this.updateTable()
+        this.updateUser()
       } else {
-        this.insertTable()
+        this.insertUser()
       }
 
     },
@@ -197,17 +217,41 @@ export default {
       let self = this
       self.form = {
         name: '',
-        area: '',
-        defaultSeat: 2
+        phoneNumber: '',
+        password: '',
+        userType: [],
+        remaks: "",
+        isEnable: true
       }
       self.dialogFormVisible = false
+    },
+    loadUserTypeList() {
+      let self = this
+      self.userTypeList = [
+        {
+          name: "管理员",
+          _id: 0,
+        },
+        {
+          name: "收银员",
+          _id: 1,
+        },
+        {
+          name: "厨师",
+          _id: 2,
+        },
+        {
+          name: "服务员",
+          _id: 3,
+        }
+      ]
     }
   },
   mounted() {
     let self = this
     self.defaultForm()
-    self.loadTableList()
-    self.loadTableAreaList()
+    self.loadUserList()
+    self.loadUserTypeList()
   }
 }
 </script>

@@ -144,12 +144,13 @@ export default {
       } else {
         this.insertProductType()
       }
-      this.dialogFormVisible = false
+
     },
     defaultForm() {
       this.form = {
         name: ''
       }
+      this.dialogFormVisible = false
     },
   },
   mounted() {

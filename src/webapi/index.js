@@ -5,9 +5,12 @@ import {
 import {
     Message
 } from "element-ui";
+// import {
+//     promised
+// } from "q";
 
-const DevBaseUrl = "http://127.0.0.1:3000"
-const ProdBashUrl = "https://xxx.xxx"
+const DevBaseUrl = "http://localhost:3000"
+const ProdBashUrl = DevBaseUrl
 
 let config = {
     baseURL: process.env.NODE_ENV !== "production" ? DevBaseUrl : ProdBashUrl // 配置API接口地址
@@ -19,7 +22,6 @@ if (token) {
         Authorization: "Bearer " + token
     }
 }
-
 
 
 let request = axios.create(config)
@@ -45,13 +47,13 @@ request.interceptors.request.use(
 )
 
 request.interceptors.response.use(function (response) {
-    // Do something with response data
     if (response.data.result === false) {
         Message({
             showClose: true,
             message: response.data.data,
             type: "error"
         });
+        return Promise.reject(response.data.data)
     }
     return Promise.resolve(response);
 }, function (error) {

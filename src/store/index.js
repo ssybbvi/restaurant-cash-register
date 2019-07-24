@@ -18,7 +18,7 @@ const state = {
     },
     productItems: [],
     currentProductId: '',
-    orderMode: enumerate.orderMode.productProductList,
+    orderMode: enumerate.orderMode.productList,
     netError: {}
 }
 
