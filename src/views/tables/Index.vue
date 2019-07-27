@@ -2,12 +2,10 @@
   <div id="container">
     <ul>
       <template v-for="item in tableListWithAreaId">
-        <li
-          v-if="item.status==1"
-          :key="item._id"
-          :class="item.status|tabelStatusColor"
-          @click="setSeat(item)"
-        >
+        <li v-if="item.status==1"
+            :key="item._id"
+            :class="item.status|tabelStatusColor"
+            @click="setSeat(item)">
           <div class="top">
             <span class="people">{{item.defaultSeat}}人</span>
             <span class="number">{{item.name}}</span>
@@ -19,12 +17,10 @@
             {{item.status|tableStatusTags}}
           </div>
         </li>
-        <li
-          v-if="item.status>1"
-          :key="item._id"
-          :class="item.status|tabelStatusColor"
-          @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})"
-        >
+        <li v-if="item.status>1"
+            :key="item._id"
+            :class="item.status|tabelStatusColor"
+            @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})">
           <div class="top">
             <span class="people">{{item.seat}}人</span>
             <span class="number">{{item.name}}</span>
@@ -38,48 +34,37 @@
         </li>
       </template>
     </ul>
-    <minor-menus
-      ref="minorMenus"
-      :menu-list="tableAreaList.map(item=>item.name)"
-      @selected="switchMenu"
-      :top_menu_name="'全部'"
-    >
+    <minor-menus ref="minorMenus"
+                 :menu-list="tableAreaList.map(item=>item.name)"
+                 @selected="switchMenu"
+                 :top_menu_name="'全部'">
       <li>
         全部
       </li>
     </minor-menus>
 
-    <el-dialog
-      title="开台"
-      :visible.sync="dialogFormVisible"
-    >
+    <el-dialog title="开台"
+               :visible.sync="dialogFormVisible">
       <el-form :model="form">
-        <el-form-item
-          label="就餐人数"
-          :label-width="formLabelWidth"
-        >
-          <el-input-number
-            v-model="form.seat"
-            :min="1"
-            :max="10"
-            label="描述文字"
-          ></el-input-number>
+        <el-form-item label="就餐人数"
+                      :label-width="formLabelWidth">
+          <el-input-number v-model="form.seat"
+                           :min="1"
+                           :max="10"
+                           label="描述文字"></el-input-number>
         </el-form-item>
       </el-form>
-      <div
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button
-          type="primary"
-          @click="openTable()"
-        >确 定</el-button>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button type="primary"
+                   @click="openTable()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import MinorMenus from '@/components/comm/MinorMenus.vue'
+import { subscriptionSocket } from '../../webapi/socket-client'
 
 export default {
   data() {
@@ -123,7 +108,7 @@ export default {
     openTable() {
       let self = this
       self.dialogFormVisible = false
-      self.$http.post("/opentable", this.form).then(resolve => {
+      self.$http.post("/restaurant/opentable", this.form).then(resolve => {
         self.$router.push({ name: "shoppingcart", query: { orderId: resolve.data.data._id } })
       })
     },
@@ -145,6 +130,11 @@ export default {
     let self = this
     self.loadTableList()
     self.loadTableAreaList()
+
+
+    subscriptionSocket('openTable', () => {
+      self.loadTableList()
+    });
   },
   destroyed() {
   }

@@ -5,6 +5,7 @@
     <el-main>
       <el-row :gutter="20">
         <el-col :span="6"
+                :key="item._id"
                 v-for="item in waitCookQueues.chefList">
           <el-row>
             <div>{{item.name}}</div>
@@ -26,7 +27,7 @@
                   <!-- <i :class="element.fixed? 'fa fa-anchor' : 'glyphicon glyphicon-pushpin'"
                      @click=" element.fixed=! element.fixed"
                      aria-hidden="true"></i> -->
-                  {{element.name}}
+                  {{element.name}}({{element.tableName}})
                   <span class="badge">{{element._id}}</span>
                 </li>
               </transition-group>
@@ -41,8 +42,7 @@
 
 <script>
 import draggable from "vuedraggable";
-import io from 'socket.io-client';
-
+import { subscriptionSocket } from '../../webapi/socket-client'
 
 export default {
   components: {
@@ -56,7 +56,7 @@ export default {
       waitCookQueues: {
         chefList: [],
       },
-      socket: io('localhost:3000')
+
     };
   },
   methods: {
@@ -68,12 +68,15 @@ export default {
         draggedElement
       }
       return true
-
     },
     loadWaitCookQueues() {
-      this.$http.post("/scheduling/cookProduct", { orderItemId: this.message }).then(() => { })
+      let self = this
+      console.log("loadWaitCookQueues", "13")
+      self.$http.get("/restaurant/fetchWaitCookQueues").then(resolve => {
+        self.waitCookQueues = resolve.data.data
+        console.log(" resolve.data.data", resolve.data.data)
+      })
     },
-
     draggableOrderItem(evt) {
       let self = this
 
@@ -88,13 +91,13 @@ export default {
         return
       }
 
-      self.$http.post("/scheduling/draggableOrderItem", {
+      self.$http.put("/restaurant/draggableOrderItem", {
         fromChefId: evt.from.id,
         toChefId: evt.to.id,
         orderItem: self.moveParam.draggedElement,
         oldIndex: evt.oldIndex,
         newIndex: evt.newIndex
-      }).then(() => { })
+      })
     }
   },
   computed: {
@@ -107,12 +110,39 @@ export default {
     }
   },
   mounted() {
-    this.socket.on('orderItemQueue', (data) => {
-      this.waitCookQueues = data
+    let self = this
+    subscriptionSocket('draggableOrderItem', () => {
+      self.loadWaitCookQueues()
     });
-    this.$http.get("/scheduling/fetchWaitCookQueues").then(resolve => {
-      this.waitCookQueues = resolve.data.data
-    })
+
+    subscriptionSocket('deleteOrderItem', (orderItem) => {
+      if (orderItem.status === self.$Enumerate.productStatus.waitCooking) {
+        self.loadWaitCookQueues()
+      }
+    });
+
+    subscriptionSocket('orderMake', () => {
+      self.loadWaitCookQueues()
+    });
+
+    subscriptionSocket('setChefProduct', () => {
+      self.loadWaitCookQueues()
+    });
+
+    subscriptionSocket('chefUpdateWork', () => {
+      self.loadWaitCookQueues()
+    });
+
+    subscriptionSocket('startCookOrderItem', () => {
+      self.loadWaitCookQueues()
+    });
+
+    subscriptionSocket('setRemarkOrderItem', () => {
+      self.loadWaitCookQueues()
+    });
+
+
+    self.loadWaitCookQueues()
   }
 };
 </script>

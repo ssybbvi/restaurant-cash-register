@@ -17,7 +17,7 @@ const state = {
         eventItems: []
     },
     productItems: [],
-    currentProductId: '',
+    currentOrderItemId: '',
     orderMode: enumerate.orderMode.productList,
     netError: {}
 }
@@ -34,7 +34,7 @@ const mutations = {
         state.orderMode = data
     },
     [types.CURRENT_PRODUCT_ID](state, data) {
-        state.currentProductId = data
+        state.currentOrderItemId = data
     },
 }
 
@@ -50,7 +50,7 @@ const actions = {
             commit(types.FETCH_ERROR, reject)
         })
 
-        axios.get(`/orderItem`, {
+        axios.get(`/restaurant/getOrderItem`, {
             params: {
                 orderId
             }

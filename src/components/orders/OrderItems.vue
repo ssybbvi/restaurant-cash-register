@@ -10,15 +10,18 @@
     </ul>
     <div class="orderItems">
       <draggable v-model="$store.state.productItems"
+                 :move="onMove"
                  @end="endDraggable">
         <transition-group type="transition"
                           :name="'flip-list'">
           <ul @click="selectedOrderItem(item)"
-              v-for="item in $store.state.productItems"
-              :key="item._id">
-            <li :class="orderItemClass(item)">{{item.name}}</li>
+              v-for=" item  in $store.state.productItems"
+              :key="item._id"
+              :class="$store.state.currentOrderItemId===item._id?'selected':''">
+            <li :class="
+              orderItemClass(item)">{{item.name}}</li>
             <li>
-              <span>￥{{item.price}}</span>
+              <span>￥{{item.isGift?0:item.price}}</span>
               <span v-show="item.isGift"
                     class="gift"></span>
               <span v-show="item.isTimeout"
@@ -33,13 +36,13 @@
         </transition-group>
       </draggable>
       <ul class="summary">
-        <li>总金额:￥{{$store.state.currentOrder.totalPrice}}</li>
+        <li>总金额:￥{{getTotalAmount()}}</li>
       </ul>
     </div>
 
     <div class="foot">
       <el-button @click="orderMake"
-                 :disabled="!$store.state.productItems.some(f => f.status === $Enumerate.productStatus.normal)">下单到厨房</el-button>
+                 :disabled="!$store.state.productItems.some(f => f.status === $Enumerate.productStatus.normal&& f.isTimeout===false)">下单到厨房</el-button>
       <el-button @click="settlement">开始结算</el-button>
     </div>
   </div>
@@ -60,10 +63,7 @@ export default {
   methods: {
     orderMake() {
       let self = this
-      self.$http.put("/orderMake", { orderId: self.$store.state.currentOrder._id }).then(() => {
-        self.$store.dispatch("feachOrderById")
-        self.$http.post("/scheduling/loadOrderItemToWaitCookQueues")
-      })
+      self.$http.put("/restaurant/orderMake", { orderId: self.$store.state.currentOrder._id })
     },
     settlement() {
       let self = this
@@ -79,23 +79,41 @@ export default {
       if (item.status == self.$Enumerate.productStatus.normal) {
         return "order-items"
       }
+      if (item.status == self.$Enumerate.productStatus.waitCooking) {
+        return "order-items-wait"
+      }
       if (item.status == self.$Enumerate.productStatus.cooking) {
         return "order-items-ing"
       }
       if (item.status == self.$Enumerate.productStatus.finish) {
         return "order-items-finish"
       }
+      if (item.status == self.$Enumerate.productStatus.transporting) {
+        return "order-items-transporting"
+      }
+      if (item.status == self.$Enumerate.productStatus.transportFinish) {
+        return "order-items-transport-finish"
+      }
       return ""
     },
     endDraggable() {
-      console.log(this.$store.state.productItems)
+      let self = this
+      let orderItemIds = self.$store.state.productItems.map(item => item._id)
+      self.$http.put("/restaurant/setOrderItemSort", { orderItemIds, orderId: self.$store.state.route.query.orderId })
     },
-    // onMove({ relatedContext, draggedContext }) {
-    //   let self = this
-    //   const relatedElement = relatedContext.element;
-    //   const draggedElement = draggedContext.element;
-    //   return relatedElement.status !== self.$Enumerate.productStatus.finish && draggedElement.status !== self.$Enumerate.productStatus.finish
-    // }
+    onMove({ relatedContext, draggedContext }) {
+      let self = this
+      const relatedElement = relatedContext.element;
+      const draggedElement = draggedContext.element;
+      return relatedElement.status === self.$Enumerate.productStatus.normal && draggedElement.status === self.$Enumerate.productStatus.normal
+    },
+    getTotalAmount() {
+      let self = this
+      return self.$store.state.productItems.reduce((acc, cur) => {
+        acc += cur.isGift ? 0 : cur.price
+        return acc
+      }, 0)
+    }
   },
   mounted() {
 
@@ -155,17 +173,29 @@ export default {
       height: 40px;
       border-bottom: 1px solid #ccc;
       font-size: 16px;
+      &.selected {
+        background-color: #ecf0f1;
+      }
       li {
         display: flex;
         justify-content: center;
         &.order-items {
           color: #2ecc71;
         }
+        &.order-items-wait {
+          color: #2980b9;
+        }
         &.order-items-ing {
           color: #f1c40f;
         }
         &.order-items-finish {
           color: #e74c3c;
+        }
+        &.order-items-transporting {
+          color: #8e44ad;
+        }
+        &.order-items-transport-finish {
+          color: #2c3e50;
         }
         height: 100%;
         display: flex;
@@ -214,7 +244,7 @@ export default {
   .foot {
     display: flex;
     flex-shrink: 0;
-    flex-basis: 50px;
+    flex-basis: 60px;
     justify-content: space-around;
     align-items: center;
     border-top: 1px solid #ccc;

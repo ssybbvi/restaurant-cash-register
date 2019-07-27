@@ -13,7 +13,9 @@ export default {
         normal: 1,
         waitCooking: 2,
         cooking: 3,
-        finish: 4
+        finish: 4,
+        transporting: 5,
+        transportFinish: 6
     },
     remarkType: {
         product: 1,

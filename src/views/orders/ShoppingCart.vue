@@ -15,6 +15,7 @@ import OrderItemInfo from '@/components/orders/OrderItemInfo.vue'
 import Settlement from '@/components/orders/Settlement.vue'
 import * as types from '@/store/mutation-types'
 import enumerate from '@/filter/enumerate'
+import { subscriptionSocket } from '../../webapi/socket-client'
 
 export default {
   data: function () {
@@ -35,21 +36,12 @@ export default {
   methods: {
     selectedProduct(product) {
       let self = this
-      let orderId = self.$store.state.currentOrder._id
-      self.$http.post("/orderItem", {
+      let orderId = self.$store.state.route.query.orderId
+      self.$http.post("/restaurant/insertOrderItem", {
         orderId: orderId,
         productId: product._id,
         name: product.name,
         price: product.price,
-        isGift: false,
-        isTimeout: false,
-        isExpedited: false,
-        isBale: false,
-        isDelete: false,
-        remark: "",
-        status: enumerate.productStatus.normal
-      }).then(() => {
-        self.$store.dispatch("feachOrderById")
       })
     },
     selectedOrderItem(product) {
@@ -62,6 +54,9 @@ export default {
     let self = this
     self.$store.dispatch("feachOrderById")
     self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
+    subscriptionSocket(`orderId:${self.$store.state.route.query.orderId}`, () => {
+      self.$store.dispatch("feachOrderById")
+    })
   }
 }
 </script>

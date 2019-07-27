@@ -1,12 +1,15 @@
 <template>
   <section>
     <div class="product-status">
-      <el-button @click="deleteOrderItem">删除</el-button>
+      <el-button @click="deleteOrderItem"
+                 v-if="[$Enumerate.productStatus.normal,$Enumerate.productStatus.waitCooking].some(s=>s===productItem.status)">删除</el-button>
       <el-button @click="giftOrderItem"
                  :class="{'gift':productItem.isGift}">{{productItem.isGift?"取消赠菜":"赠菜"}}</el-button>
       <el-button @click="timeOutOrderItem"
+                 v-if="[$Enumerate.productStatus.normal].some(s=>s===productItem.status)"
                  :class="{'time-out':productItem.isTimeout}">{{productItem.isTimeout?"取消暂停":"暂停"}}</el-button>
       <el-button @click="expediteOrderItem"
+                 v-if="[$Enumerate.productStatus.normal,$Enumerate.productStatus.waitCooking].some(s=>s===productItem.status)"
                  :class="{'expedited':productItem.isExpedited}">{{productItem.isExpedited?"取消加急":"加急"}}</el-button>
       <el-button @click="baleOrderItem"
                  :class="{'bale':productItem.isBale}">{{productItem.isBale?"取消打包":"打包"}}</el-button>
@@ -17,15 +20,7 @@
         <el-form-item label="菜名">
           {{productItem.name}}
         </el-form-item>
-        <el-form-item label="数量"
-                      v-if="false">
-          <span id="quantity">
-            <el-input-number v-model="productItem.quantity"
-                             @change="savePorductItem"
-                             :min="0"
-                             :max="10"></el-input-number>
-          </span>
-        </el-form-item>
+
         <el-form-item label="备注">
           <el-input type="textarea"
                     :rows="2"
@@ -63,6 +58,12 @@
              class="el-icon-setting"
              style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
         </el-form-item>
+        <el-form-item label="">
+          <span id="quantity">
+            <el-button type="primary"
+                       @click="setRemark(productItem.remark)">保存</el-button>
+          </span>
+        </el-form-item>
       </el-form>
     </div>
   </section>
@@ -71,6 +72,7 @@
 <script>
 import * as types from '@/store/mutation-types'
 import enumerate from '@/filter/enumerate'
+
 
 export default {
   data() {
@@ -86,7 +88,7 @@ export default {
   computed: {
     productItem() {
       let self = this
-      return self.$store.state.productItems.find(f => f._id == self.$store.state.currentProductId)
+      return self.$store.state.productItems.find(f => f._id == self.$store.state.currentOrderItemId)
     }
   },
   methods: {
@@ -125,43 +127,41 @@ export default {
       this.reamrkInputVisible = false;
       this.remakContent = '';
     },
-    setRemark(content) {
+    setRemark(remark) {
       let self = this
-      self.savePorductItem({ remark: self.productItem.remark + content })
+      self.$http.put(`/restaurant/setRemarkOrderItem`, {
+        orderItemId: self.productItem._id,
+        remark
+      })
     },
     giftOrderItem() {
       let self = this
-      self.savePorductItem({ isGift: !self.productItem.isGift })
+      self.$http.put(`/restaurant/setGiftOrderItem`, {
+        orderItemId: self.productItem._id,
+      })
     },
     timeOutOrderItem() {
       let self = this
-      self.savePorductItem({ isTimeout: !self.productItem.isTimeout })
+      self.$http.put(`/restaurant/setTimeOutOrderItem`, {
+        orderItemId: self.productItem._id,
+      })
     },
     expediteOrderItem() {
       let self = this
-      self.savePorductItem({ isExpedited: !self.productItem.isExpedited })
+      self.$http.put(`/restaurant/setExpediteOrderItem`, {
+        orderItemId: self.productItem._id,
+      })
     },
     baleOrderItem() {
       let self = this
-      self.savePorductItem({ isBale: !self.productItem.isBale })
+      self.$http.put(`/restaurant/setBaleOrderItem`, {
+        orderItemId: self.productItem._id,
+      })
     },
     deleteOrderItem() {
       let self = this
-      let orderItemId = self.$store.state.currentProductId
-      self.$http.delete("/orderItem", { data: { _id: orderItemId } }).then(() => {
-        self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
-        self.$store.dispatch("feachOrderById")
-        if (self.productItem.state === self.$Enumerate.productStatus.waitCooking) {
-          self.$http.post("/scheduling/deleteWaitCookQueueChefOrderItem")
-        }
-      })
-    },
-    savePorductItem(updateBody) {
-      let self = this
-      let orderItemId = self.$store.state.currentProductId
-      self.$http.put(`/orderItem?_id=${orderItemId}`, updateBody).then(() => {
-        self.$store.dispatch("feachOrderById")
-      })
+      self.$http.delete("/restaurant/deleteOrderItem", { data: { orderItemId: self.productItem._id, deleteReamrk: "收银员删除" } })
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
     }
   },
   mounted() {

@@ -65,7 +65,7 @@ export default {
       let userInfo = getUserInfo().userInfo
 
       self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
-      self.$http.post("/paymentOrder", {
+      self.$http.post("/restaurant/paymentOrder", {
         orderId: self.$store.state.currentOrder._id,
         remark: self.remark,
         paymentPrice: self.paymentPrice,
