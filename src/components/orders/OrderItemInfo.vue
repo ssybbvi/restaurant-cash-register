@@ -16,7 +16,8 @@
       <el-button @click="returnOrderItems">返回</el-button>
     </div>
     <div class="product-info">
-      <el-form label-width="80px">
+      <el-form label-width="80px"
+               @submit.native.prevent>
         <el-form-item label="菜名">
           {{productItem.name}}
         </el-form-item>

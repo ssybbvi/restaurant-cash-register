@@ -102,7 +102,7 @@ export default {
     },
     loadOrderItems() {
       let self = this
-      self.$http.get("/orderItem", { params: { orderId: self.currentOrder._id } }).then(resolve => {
+      self.$http.get("/restaurant/getOrderItem", { params: { orderId: self.currentOrder._id } }).then(resolve => {
         self.orderItems = resolve.data.data.map(item => {
           item.price = "¥" + item.price
           return item

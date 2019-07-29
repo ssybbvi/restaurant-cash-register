@@ -12,6 +12,6 @@ export default {
         return moment.utc(moment(Date.now()).diff(moment(time))).format("HH:mm")
     },
     dataTime(time) {
-        return moment(time).format("YYYY年MM月DD日 hh:mm:ss")
+        return moment(time).format("YYYY年MM月DD日 HH:mm:ss")
     }
 }

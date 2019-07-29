@@ -19,6 +19,7 @@ const state = {
     productItems: [],
     currentOrderItemId: '',
     orderMode: enumerate.orderMode.productList,
+    orderTableMode: enumerate.orderTableMode.orderItemList,
     netError: {}
 }
 
@@ -36,6 +37,9 @@ const mutations = {
     [types.CURRENT_PRODUCT_ID](state, data) {
         state.currentOrderItemId = data
     },
+    [types.SET_ORDER_TABLE_MODE](state, data) {
+        state.orderTableMode = data
+    }
 }
 
 

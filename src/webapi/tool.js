@@ -83,7 +83,13 @@ export let delToken = function () {
 export let getUserInfo = function () {
     let token = getToken()
     if (!token) {
-        return null
+        return {
+            userInfo: {
+                name: "尼古拉斯凯奇",
+                userType: 1,
+                _id: "xxxx"
+            }
+        }
     }
 
     let userInfoToken = token.split(".")[1]

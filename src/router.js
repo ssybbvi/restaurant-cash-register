@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Layout from './views/Layout.vue'
-import Home from './views/Home.vue'
 import Login from './views/auth/Login.vue'
 
 
@@ -15,16 +14,13 @@ const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [{
+      path: '/',
+      redirect: '/tables',
+    }, {
       path: '/login',
       name: 'login',
       component: Login,
     },
-    {
-      path: '/',
-      name: 'home',
-      component: Home,
-    },
-
     {
       path: '/',
       name: 'loyout',
@@ -109,20 +105,20 @@ const router = new Router({
 })
 
 
-// router.beforeEach((to, from, next) => {
-//   if (to.name == "login") {
-//     next()
-//     return
-//   }
+router.beforeEach((to, from, next) => {
+  if (to.name == "login") {
+    next()
+    return
+  }
 
-//   let userInfo = getUserInfo()
-//   if (!userInfo) {
-//     next({
-//       name: 'login'
-//     })
-//     return
-//   }
-//   next()
-// })
+  let userInfo = getUserInfo()
+  if (!userInfo) {
+    next({
+      name: 'login'
+    })
+    return
+  }
+  next()
+})
 
 export default router

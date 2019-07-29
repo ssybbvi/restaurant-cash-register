@@ -4798,6 +4798,10 @@ number-is-nan@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npm.taobao.org/number-is-nan/download/number-is-nan-1.0.1.tgz#097b602b53422a522c1afb8790318336941a011d"
 
+number-precision@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.npm.taobao.org/number-precision/download/number-precision-1.3.1.tgz#b56cf62552105eb590cab77868e62d6e0b2b8e08"
+
 oauth-sign@~0.9.0:
   version "0.9.0"
   resolved "https://registry.npm.taobao.org/oauth-sign/download/oauth-sign-0.9.0.tgz#47a7b016baa68b5fa0ecf3dee08a85c679ac6455"

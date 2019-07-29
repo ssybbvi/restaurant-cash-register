@@ -1,12 +1,15 @@
 <template>
   <div id="order">
     <ul class="info">
-      <li>{{$store.state.currentOrder.tableAreaName}}</li>
+
       <li>{{$store.state.currentOrder.tableName}}</li>
       <li>
         <i class="icon-time fs22"></i>
         <span>{{$store.state.currentOrder.startDateTime|spendTime}}</span>
       </li>
+      <li><i class="el-icon-s-unfold"
+           style="font-size:24px"
+           @click="swichToTablePanel"></i></li>
     </ul>
     <div class="orderItems">
       <draggable v-model="$store.state.productItems"
@@ -30,7 +33,6 @@
                     class="expedited"></span>
               <span v-show="item.isBale"
                     class="bale"></span>
-              <span class="highlighted-order-item"></span>
             </li>
           </ul>
         </transition-group>
@@ -41,9 +43,13 @@
     </div>
 
     <div class="foot">
+
+      <el-button @click="settlement"
+                 v-show="!orderSettlementStatus">开始结算</el-button>
+      <el-button @click="cancelOrder"
+                 v-show="orderSettlementStatus">取消订单</el-button>
       <el-button @click="orderMake"
-                 :disabled="!$store.state.productItems.some(f => f.status === $Enumerate.productStatus.normal&& f.isTimeout===false)">下单到厨房</el-button>
-      <el-button @click="settlement">开始结算</el-button>
+                 :disabled="orderMakeStatus">下单到厨房</el-button>
     </div>
   </div>
 </template>
@@ -59,6 +65,14 @@ export default {
   },
   components: {
     Draggable,
+  },
+  computed: {
+    orderSettlementStatus() {
+      return this.$store.state.productItems.every(e => e.status === this.$Enumerate.productStatus.normal)
+    },
+    orderMakeStatus() {
+      return !this.$store.state.productItems.some(f => f.status === this.$Enumerate.productStatus.normal && f.isTimeout === false)
+    }
   },
   methods: {
     orderMake() {
@@ -113,6 +127,16 @@ export default {
         acc += cur.isGift ? 0 : cur.price
         return acc
       }, 0)
+    },
+    cancelOrder() {
+      let self = this
+      self.$http.put("/restaurant/cancelOrder", { orderId: self.$store.state.route.query.orderId }).then(() => {
+        self.$router.push({ name: "tables" })
+      })
+    },
+    swichToTablePanel() {
+      let self = this
+      self.$store.commit(types.SET_ORDER_TABLE_MODE, self.$Enumerate.orderTableMode.tablePanel)
     }
   },
   mounted() {

@@ -43,7 +43,7 @@ export default {
       }).then(() => {
         delToken()
         self.$router.replace("/login")
-      }).catch(_ => { })
+      })
     }
   },
   mounted() {

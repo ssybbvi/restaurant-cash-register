@@ -3,35 +3,25 @@
     <div id="head"></div>
     <div id="body">
       <ul id="nav">
-        <router-link
-          to="/setting/table-area-list"
-          tag="li"
-        >
+        <router-link to="/setting/table-area-list"
+                     tag="li">
           桌面区域管理
         </router-link>
-        <router-link
-          to="/setting/table-list"
-          tag="li"
-        >
+        <router-link to="/setting/table-list"
+                     tag="li">
           桌面管理
         </router-link>
-        <router-link
-          to="/setting/product-list"
-          tag="li"
-        >
+        <router-link to="/setting/product-list"
+                     tag="li">
           菜品管理
         </router-link>
-        <router-link
-          to="/setting/product-type-list"
-          tag="li"
-        >
+        <router-link to="/setting/product-type-list"
+                     tag="li">
           菜品类型管理
         </router-link>
-        <router-link
-          to="/setting/user-list"
-          tag="li"
-        >
-          员工
+        <router-link to="/setting/user-list"
+                     tag="li">
+          员工管理
         </router-link>
       </ul>
     </div>

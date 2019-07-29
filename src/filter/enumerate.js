@@ -24,7 +24,11 @@ export default {
     orderMode: {
         productList: 1,
         productItemInfo: 2,
-        settlement: 3
+        settlement: 3,
+    },
+    orderTableMode: {
+        orderItemList: 1,
+        tablePanel: 2
     },
     userType: {
         admin: 0,

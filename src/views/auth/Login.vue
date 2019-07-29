@@ -27,7 +27,7 @@
 </template>
 <script>
 
-import { setToken, getUserInfo } from "@/webapi/tool"
+import { setToken } from "@/webapi/tool"
 
 export default {
   data() {

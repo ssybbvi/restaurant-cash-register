@@ -10,16 +10,16 @@ export default {
         moment(agument) {
             return moment(agument)
         },
-        debounce(func, delay) {
-            return (...args) => {
-                if (this.debounceTimer) {
-                    clearTimeout(this.debounceTimer)
-                }
-                this.debounceTimer = setTimeout(() => {
-                    func.apply(this, args)
-                }, delay);
-            }
-        }
+        // debounce(func, delay) {
+        //     return (...args) => {
+        //         if (this.debounceTimer) {
+        //             clearTimeout(this.debounceTimer)
+        //         }
+        //         this.debounceTimer = setTimeout(() => {
+        //             func.apply(this, args)
+        //         }, delay);
+        //     }
+        // }
     },
 
 }

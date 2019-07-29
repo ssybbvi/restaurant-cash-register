@@ -24,11 +24,15 @@
                 <li class="list-group-item"
                     v-for="element in item.list"
                     :key="element._id">
-                  <!-- <i :class="element.fixed? 'fa fa-anchor' : 'glyphicon glyphicon-pushpin'"
-                     @click=" element.fixed=! element.fixed"
-                     aria-hidden="true"></i> -->
-                  {{element.name}}({{element.tableName}})
-                  <span class="badge">{{element._id}}</span>
+                  <span>({{element.tableName}})[{{Number.parseInt((Date.now()-element.orderMakeDateTime)/1000/60 )}}]{{element.name}}</span>
+                  <span v-show="element.isGift"
+                        class="gift"></span>
+                  <span v-show="element.isTimeout"
+                        class="time-out"></span>
+                  <span v-show="element.isExpedited"
+                        class="expedited"></span>
+                  <span v-show="element.isBale"
+                        class="bale"></span>
                 </li>
               </transition-group>
             </draggable>
@@ -71,10 +75,8 @@ export default {
     },
     loadWaitCookQueues() {
       let self = this
-      console.log("loadWaitCookQueues", "13")
       self.$http.get("/restaurant/fetchWaitCookQueues").then(resolve => {
         self.waitCookQueues = resolve.data.data
-        console.log(" resolve.data.data", resolve.data.data)
       })
     },
     draggableOrderItem(evt) {
@@ -137,7 +139,19 @@ export default {
       self.loadWaitCookQueues()
     });
 
-    subscriptionSocket('setRemarkOrderItem', () => {
+    // subscriptionSocket('setRemarkOrderItem', () => {
+    //   self.loadWaitCookQueues()
+    // });
+
+    subscriptionSocket('setGiftOrderItem', () => {
+      self.loadWaitCookQueues()
+    });
+
+    // subscriptionSocket('setBaleOrderItem', () => {
+    //   self.loadWaitCookQueues()
+    // });
+
+    subscriptionSocket('expediteOrderItem', () => {
       self.loadWaitCookQueues()
     });
 
@@ -147,7 +161,23 @@ export default {
 };
 </script>
 
-<style>
+<style  scoped lang="scss">
+.gift {
+  background-color: #2ecc71;
+}
+
+.time-out {
+  background-color: #3498db;
+}
+
+.expedited {
+  background-color: #e74c3c;
+}
+
+.bale {
+  background-color: #f39c12;
+}
+
 .flip-list-move {
   transition: transform 0.5s;
 }
@@ -163,12 +193,31 @@ export default {
 }
 .list-group-item {
   cursor: move;
+  min-height: 30px;
   border: 1px solid #ddd;
   font-size: 16px;
-  padding: 5px 3px;
+  padding-left: 3px;
   margin-top: 5px;
-}
-.list-group-item i {
-  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  color: #2980b9;
+  padding-left: 5px;
+  span:nth-child(1) {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+  span:nth-child(2) {
+    flex-basis: 5px;
+  }
+  span:nth-child(3) {
+    flex-basis: 5px;
+  }
+  span:nth-child(4) {
+    flex-basis: 5px;
+  }
+  span:nth-child(5) {
+    flex-basis: 5px;
+  }
 }
 </style>

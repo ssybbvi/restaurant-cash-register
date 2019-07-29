@@ -2,7 +2,7 @@
   <div id="container">
     <ul>
       <template v-for="item in tableListWithAreaId">
-        <li v-if="item.status==1"
+        <li v-if="item.status==$Enumerate.tableStatus.available "
             :key="item._id"
             :class="item.status|tabelStatusColor"
             @click="setSeat(item)">
@@ -17,7 +17,7 @@
             {{item.status|tableStatusTags}}
           </div>
         </li>
-        <li v-if="item.status>1"
+        <li v-if="item.status!==$Enumerate.tableStatus.available"
             :key="item._id"
             :class="item.status|tabelStatusColor"
             @click="$router.push({name:'shoppingcart',query:{orderId:item.orderId}})">
@@ -131,10 +131,22 @@ export default {
     self.loadTableList()
     self.loadTableAreaList()
 
-
     subscriptionSocket('openTable', () => {
       self.loadTableList()
     });
+
+    subscriptionSocket('paymentOrder', () => {
+      self.loadTableList()
+    });
+
+    subscriptionSocket('cancelOrder', () => {
+      self.loadTableList()
+    });
+
+    subscriptionSocket('changeSet', () => {
+      self.loadTableList()
+    });
+
   },
   destroyed() {
   }
