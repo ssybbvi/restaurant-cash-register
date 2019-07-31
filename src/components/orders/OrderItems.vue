@@ -37,13 +37,27 @@
           </ul>
         </transition-group>
       </draggable>
+      <div>
+        <span>
+          <ul>
+            <li>
+              茶水费
+            </li>
+            <li id="seat-li">
+              <div><i class="el-icon-remove-outline"
+                   @click="decreaseSeat" /></div>
+              <div>￥2x{{$store.state.currentOrder.seat}}</div>
+              <div><i class="el-icon-circle-plus-outline"
+                   @click="increaseSeat" /></div>
+            </li>
+          </ul>
+        </span>
+      </div>
       <ul class="summary">
         <li>总金额:￥{{getTotalAmount()}}</li>
       </ul>
     </div>
-
     <div class="foot">
-
       <el-button @click="settlement"
                  v-show="!orderSettlementStatus">开始结算</el-button>
       <el-button @click="cancelOrder"
@@ -56,11 +70,11 @@
 <script>
 import Draggable from 'vuedraggable'
 import * as types from "@/store/mutation-types"
+import NP from 'number-precision'
 
 export default {
-  data: function () {
+  data() {
     return {
-
     }
   },
   components: {
@@ -77,7 +91,13 @@ export default {
   methods: {
     orderMake() {
       let self = this
-      self.$http.put("/restaurant/orderMake", { orderId: self.$store.state.currentOrder._id })
+      self.$http.put("/restaurant/orderMake", { orderId: self.$store.state.currentOrder._id }).then(() => {
+        self.$notify({
+          title: '成功',
+          message: '下单成功',
+          type: 'success'
+        });
+      })
     },
     settlement() {
       let self = this
@@ -123,10 +143,14 @@ export default {
     },
     getTotalAmount() {
       let self = this
-      return self.$store.state.productItems.reduce((acc, cur) => {
-        acc += cur.isGift ? 0 : cur.price
+      let orderItemTotalPrice = self.$store.state.productItems.reduce((acc, cur) => {
+        if (!cur.isGift) {
+          acc = NP.plus(acc, cur.price)
+        }
         return acc
       }, 0)
+      orderItemTotalPrice += NP.times(self.$store.state.currentOrder.seatPrice, self.$store.state.currentOrder.seat)
+      return orderItemTotalPrice
     },
     cancelOrder() {
       let self = this
@@ -137,6 +161,21 @@ export default {
     swichToTablePanel() {
       let self = this
       self.$store.commit(types.SET_ORDER_TABLE_MODE, self.$Enumerate.orderTableMode.tablePanel)
+    },
+    changeSeat(seat) {
+      let self = this
+      self.$http.put("/restaurant/changeSeat", { orderId: self.$store.state.currentOrder._id, seat: seat })
+    },
+    increaseSeat() {
+      let self = this
+      self.changeSeat(self.$store.state.currentOrder.seat + 1)
+    },
+    decreaseSeat() {
+      let self = this
+      if (self.$store.state.currentOrder.seat === 1) {
+        return
+      }
+      self.changeSeat(self.$store.state.currentOrder.seat - 1)
     }
   },
   mounted() {
@@ -275,6 +314,17 @@ export default {
   }
 }
 
+#seat-li {
+  position: relative;
+  right: 40px;
+  span {
+    display: flex;
+  }
+  i {
+    font-size: 22px;
+  }
+}
+
 #tags {
   display: flex;
   font-size: 18px;
@@ -287,3 +337,6 @@ export default {
   }
 }
 </style>
+
+
+ 

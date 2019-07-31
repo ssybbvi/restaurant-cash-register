@@ -1,11 +1,9 @@
 <template>
   <div id="search">
     <i class="icon-search"></i>
-    <input
-      type="text"
-      placeholder="搜索"
-      v-model="keyword"
-    />
+    <input type="text"
+           placeholder="搜索"
+           v-model="keyword" />
   </div>
 </template>
 <style scoped>
@@ -44,7 +42,9 @@ export default {
       let self = this
       self.$emit("search-keyword", self.keyword)
     }
-  }
+  },
+  mounted() {
+  },
 }
 
 </script>

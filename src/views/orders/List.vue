@@ -56,7 +56,7 @@
                          prop="totalPrice">
         </el-table-column>
         <el-table-column label="结账时间"
-                         prop="date">
+                         prop="paymentDateTime">
         </el-table-column>
         <el-table-column fixed="right"
                          label="操作"
@@ -112,10 +112,9 @@ export default {
     loadOrder(page = 1) {
       let self = this
       let params = Object.assign({}, self.searchFrom, { page })
-      console.log("params", params)
       self.$http.get('/order/page', { params: params }).then(resolve => {
         self.orderList = resolve.data.data.list.map(item => {
-          item.date = self.moment(item.startDateTime).format("YYYY-MM-DD HH:mm")
+          item.paymentDateTime = self.moment(item.paymentDateTime).format("YYYY-MM-DD HH:mm")
           item.duringDateTime = self.moment(item.startDateTime).format("YYYY-MM-DD HH:ss") + "-" + self.moment(item.endDateTime).format("YYYY-MM-DD HH:ss")
           item.paymentPrice = "¥" + item.paymentPrice
           item.totalPrice = "¥" + item.totalPrice

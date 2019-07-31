@@ -95,10 +95,6 @@ const router = new Router({
         path: 'index',
         component: () => import('@/views/scheduling/Index.vue'),
         name: 'scheduling-index'
-      }, {
-        path: 'demo',
-        component: () => import('@/views/scheduling/Demo.vue'),
-        name: 'scheduling-demo'
       }]
     },
   ]

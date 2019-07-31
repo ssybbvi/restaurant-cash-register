@@ -1,5 +1,16 @@
 import io from 'socket.io-client';
 
+
+const url = "http://localhost:3000"
+//const url = "http://35.236.174.214:3000"
+
+
+let socketInstance = io(url, {
+    transports: ['websocket', 'xhr-polling', 'jsonp-polling']
+})
 export let subscriptionSocket = (eventName, cb) => {
-    io('localhost:3000').on(eventName, cb);
+    socketInstance.on(eventName, cb);
+    return () => {
+        socketInstance.removeListener(eventName, cb);
+    }
 }

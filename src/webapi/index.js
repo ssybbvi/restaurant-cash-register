@@ -10,7 +10,7 @@ import {
 // } from "q";
 
 const DevBaseUrl = "http://localhost:3000"
-const ProdBashUrl = DevBaseUrl
+const ProdBashUrl = "http://35.236.174.214:3000"
 
 let config = {
     baseURL: process.env.NODE_ENV !== "production" ? DevBaseUrl : ProdBashUrl // 配置API接口地址

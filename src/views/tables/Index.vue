@@ -131,25 +131,26 @@ export default {
     self.loadTableList()
     self.loadTableAreaList()
 
-    subscriptionSocket('openTable', () => {
+    self.destroySocketList.push(subscriptionSocket('openTable', () => {
       self.loadTableList()
-    });
+    }))
 
-    subscriptionSocket('paymentOrder', () => {
+    self.destroySocketList.push(subscriptionSocket('paymentOrder', () => {
       self.loadTableList()
-    });
+    }))
 
-    subscriptionSocket('cancelOrder', () => {
+    self.destroySocketList.push(subscriptionSocket('cancelOrder', () => {
       self.loadTableList()
-    });
+    }))
 
-    subscriptionSocket('changeSet', () => {
+    self.destroySocketList.push(subscriptionSocket('changeSet', () => {
       self.loadTableList()
-    });
+    }))
 
+    self.destroySocketList.push(subscriptionSocket('changeTable', () => {
+      self.loadTableList()
+    }))
   },
-  destroyed() {
-  }
 }
 </script>
 <style scoped lang="scss">

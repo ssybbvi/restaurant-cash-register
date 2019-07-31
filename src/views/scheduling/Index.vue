@@ -60,7 +60,6 @@ export default {
       waitCookQueues: {
         chefList: [],
       },
-
     };
   },
   methods: {
@@ -113,48 +112,54 @@ export default {
   },
   mounted() {
     let self = this
-    subscriptionSocket('draggableOrderItem', () => {
+
+    self.destroySocketList.push(subscriptionSocket(`draggableOrderItem`, () => {
+      console.log('draggableOrderItem')
       self.loadWaitCookQueues()
-    });
+    }))
 
-    subscriptionSocket('deleteOrderItem', (orderItem) => {
-      if (orderItem.status === self.$Enumerate.productStatus.waitCooking) {
-        self.loadWaitCookQueues()
-      }
-    });
-
-    subscriptionSocket('orderMake', () => {
+    self.destroySocketList.push(subscriptionSocket(`deleteOrderItem`, () => {
+      console.log('deleteOrderItem')
       self.loadWaitCookQueues()
-    });
-
-    subscriptionSocket('setChefProduct', () => {
+    }))
+    self.destroySocketList.push(subscriptionSocket(`orderMake`, () => {
+      console.log('orderMake')
       self.loadWaitCookQueues()
-    });
-
-    subscriptionSocket('chefUpdateWork', () => {
+    }))
+    self.destroySocketList.push(subscriptionSocket(`setChefProduct`, () => {
+      console.log('setChefProduct')
       self.loadWaitCookQueues()
-    });
+    }))
 
-    subscriptionSocket('startCookOrderItem', () => {
+    self.destroySocketList.push(subscriptionSocket(`chefUpdateWork`, () => {
+      console.log('chefUpdateWork')
       self.loadWaitCookQueues()
-    });
+    }))
 
-    // subscriptionSocket('setRemarkOrderItem', () => {
+    self.destroySocketList.push(subscriptionSocket(`startCookOrderItem`, () => {
+      console.log('startCookOrderItem')
+      self.loadWaitCookQueues()
+    }))
+
+    //    self.destroySocketList.push(subscriptionSocket(`setRemarkOrderItem`, () => {
+    //   console.log('setRemarkOrderItem')
     //   self.loadWaitCookQueues()
-    // });
+    // }))
 
-    subscriptionSocket('setGiftOrderItem', () => {
+    self.destroySocketList.push(subscriptionSocket(`setGiftOrderItem`, () => {
+      console.log('setGiftOrderItem')
       self.loadWaitCookQueues()
-    });
+    }))
 
-    // subscriptionSocket('setBaleOrderItem', () => {
+    //    self.destroySocketList.push(subscriptionSocket(`setBaleOrderItem`, () => {
+    //   console.log('setBaleOrderItem')
     //   self.loadWaitCookQueues()
-    // });
+    // }))
 
-    subscriptionSocket('expediteOrderItem', () => {
+    self.destroySocketList.push(subscriptionSocket(`expediteOrderItem`, () => {
+      console.log('expediteOrderItem')
       self.loadWaitCookQueues()
-    });
-
+    }))
 
     self.loadWaitCookQueues()
   }

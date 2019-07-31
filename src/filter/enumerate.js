@@ -35,5 +35,10 @@ export default {
         cashier: 1,
         chef: 2,
         waiter: 3
+    },
+    paymentType: {
+        paymentType: 1,
+        weixin: 2,
+        zhifupay: 3
     }
 }

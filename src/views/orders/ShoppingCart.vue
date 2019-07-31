@@ -20,13 +20,15 @@ import enumerate from '@/filter/enumerate'
 import { subscriptionSocket } from '../../webapi/socket-client'
 
 export default {
-  data: function () {
+  data() {
     return {
       order: {
         productItems: [],
         offerPriceItems: [],
-        eventItems: []
+        eventItems: [],
+
       },
+      destroySocketList: []
     }
   },
   components: {
@@ -58,10 +60,11 @@ export default {
     self.$store.dispatch("feachOrderById")
     self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
     self.$store.commit(types.SET_ORDER_TABLE_MODE, enumerate.orderTableMode.orderItemList)
-    subscriptionSocket(`orderId:${self.$store.state.route.query.orderId}`, () => {
+
+    self.destroySocketList.push(subscriptionSocket(`orderId:${self.$store.state.route.query.orderId}`, () => {
       self.$store.dispatch("feachOrderById")
-    })
-  }
+    }))
+  },
 }
 </script>
 <style scoped lang="scss">

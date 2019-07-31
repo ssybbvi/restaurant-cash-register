@@ -3,23 +3,16 @@ import moment from 'moment'
 export default {
     data() {
         return {
-            debounceTimer: null
+            destroySocketList: [] //待取消订阅的socket
         }
+    },
+    beforeDestroy() { //组件摧毁的时候记得把socket也销毁
+        let self = this
+        self.destroySocketList.forEach(item => item())
     },
     methods: {
         moment(agument) {
             return moment(agument)
-        },
-        // debounce(func, delay) {
-        //     return (...args) => {
-        //         if (this.debounceTimer) {
-        //             clearTimeout(this.debounceTimer)
-        //         }
-        //         this.debounceTimer = setTimeout(() => {
-        //             func.apply(this, args)
-        //         }, delay);
-        //     }
-        // }
+        }
     },
-
 }

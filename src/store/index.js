@@ -14,7 +14,9 @@ const state = {
     filePath: "xxxx",
     currentOrder: {
         offerPriceItems: [],
-        eventItems: []
+        eventItems: [],
+        seatPrice: 0,
+        seat: 0
     },
     productItems: [],
     currentOrderItemId: '',
@@ -47,6 +49,7 @@ const actions = {
     feachOrderById({
         commit
     }) {
+        console.log("feachOrderById#####")
         let orderId = state.route.query.orderId
         axios.get(`/order/${orderId}`).then(resolve => {
             commit(types.CURRENT_ORDER, resolve.data.data)

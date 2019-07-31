@@ -17,8 +17,6 @@
         </el-form-item>
         <el-form-item label="直减金额">
           <el-input-number v-model="cutBackPrice"
-                           :step="0.5"
-                           :precision="1"
                            :min="0"
                            :max="totalPrice"
                            label="描述文字"></el-input-number>
@@ -37,13 +35,11 @@
         <el-form-item label="实收">
           <el-input-number v-model="paymentPrice"
                            :step="1"
-                           :precision="1"
                            :min="0"></el-input-number> 建议收款:¥{{suggestPaymentPrice}}
         </el-form-item>
         <el-form-item label="顾客付款">
           <el-input-number v-model="customerPrice"
                            :step="1"
-                           :precision="1"
                            :min="0"></el-input-number> 找零：¥{{changePrice}}
         </el-form-item>
         <el-form-item label="备注">
@@ -64,7 +60,6 @@
 </template>
 <script>
 import * as types from '@/store/mutation-types'
-import enumerate from '@/filter/enumerate'
 import { getUserInfo } from "@/webapi/tool"
 import NP from 'number-precision'
 
@@ -86,12 +81,14 @@ export default {
   computed: {
     totalPrice() {
       let self = this
-      return self.$store.state.productItems.reduce((acc, cur) => {
+      let orderItemTotalPrice = self.$store.state.productItems.reduce((acc, cur) => {
         if (!cur.isGift) {
           acc = NP.plus(acc, cur.price)
         }
         return acc
       }, 0)
+      orderItemTotalPrice += NP.times(self.$store.state.currentOrder.seatPrice, self.$store.state.currentOrder.seat)
+      return orderItemTotalPrice
     },
     offerList() {
       let self = this
@@ -142,11 +139,9 @@ export default {
     },
     suggestPaymentPrice() {
       let self = this
-      let suggestPaymentPrice = NP.minus(self.totalPrice, self.totalOfferPrice)
-      self.paymentPrice = suggestPaymentPrice
-      console.log("self.paymentPrice", self.paymentPrice)
-      self.customerPrice = suggestPaymentPrice
-      return suggestPaymentPrice
+      let _suggestPaymentPrice = NP.minus(self.totalPrice, self.totalOfferPrice)
+      self.setPaymentPriceWithCustomerPrice(_suggestPaymentPrice)
+      return _suggestPaymentPrice
     },
     changePrice() {
       let self = this
@@ -154,6 +149,11 @@ export default {
     }
   },
   methods: {
+    setPaymentPriceWithCustomerPrice(_suggestPaymentPrice) {
+      let self = this
+      self.paymentPrice = _suggestPaymentPrice
+      self.customerPrice = _suggestPaymentPrice
+    },
     returnOrderItems() {
       let self = this
       self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
@@ -169,8 +169,16 @@ export default {
         paymentPrice: self.paymentPrice,
         totalPrice: self.totalPrice,
         cashierName: userInfo.name,
-        cashieUserId: userInfo._id
+        cashieUserId: userInfo._id,
+        offerList: self.offerList,
+        totalOfferPrice: self.totalOfferPrice,
+        paymentType: self.$Enumerate.paymentType.cash
       }).then(() => {
+        self.$notify({
+          title: '成功',
+          message: '结算成功',
+          type: 'success'
+        });
         self.$router.push({ name: 'tables' })
       })
     }

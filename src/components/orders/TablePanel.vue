@@ -22,15 +22,6 @@
         <el-form-item label="会员信息">
           罗大佑（¥1290.34）
         </el-form-item>
-        <el-form-item label="用餐人数">
-          <!-- {{$store.state.currentOrder.seat}}人 -->
-          <el-input-number v-model="seat"
-                           :step="1"
-                           :min="1"
-                           :max="30"
-                           @change="changeSeat"
-                           label="描述文字"></el-input-number>
-        </el-form-item>
         <el-form-item label="换桌">
           <el-select v-model="tableId"
                      filterable
@@ -59,7 +50,6 @@ import RemarkTextbox from '@/components/comm/RemarkTextbox'
 export default {
   data() {
     return {
-      seat: this.$store.state.currentOrder.seat,
       tableId: this.$store.state.currentOrder.tableId,
       tableList: [],
     }
@@ -86,10 +76,7 @@ export default {
         });
       })
     },
-    changeSeat() {
-      let self = this
-      self.$http.put("/restaurant/changeSeat", { orderId: self.$store.state.currentOrder._id, seat: self.seat })
-    },
+
     loadTableList() {
       let self = this
       self.$http.get("/table").then(resolve => {
