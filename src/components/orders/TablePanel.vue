@@ -35,7 +35,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <RemarkTextbox></RemarkTextbox>
+          <RemarkTextbox :remark="orderRemark"
+                         :reamrkType="$Enumerate.remarkType.order"
+                         @remarkchange="setRemark"></RemarkTextbox>
+          <el-button type="primary"
+                     @click="saveRemark">保存备注</el-button>
         </el-form-item>
 
       </el-form>
@@ -52,12 +56,17 @@ export default {
     return {
       tableId: this.$store.state.currentOrder.tableId,
       tableList: [],
+      orderRemark: this.$store.state.currentOrder.remark
     }
   },
   components: {
     RemarkTextbox
   },
   methods: {
+    setRemark(val) {
+      let self = this
+      self.orderRemark = val
+    },
     changeTableName(item) {
       let self = this
       return item.status === self.$Enumerate.tableStatus.available ? item.name + "(可换桌)" : item.name + "(占用中)"
@@ -68,7 +77,7 @@ export default {
     },
     changeTable() {
       let self = this
-      self.$http.put("/restaurant/changeTable", { orderId: self.$store.state.currentOrder._id, tableId: self.tableId }).then(() => {
+      self.$http.put("/restaurant/changeTable", { orderId: self.$store.state.route.query.orderId, tableId: self.tableId }).then(() => {
         self.$notify({
           title: '成功',
           message: '换桌成功',
@@ -83,6 +92,16 @@ export default {
         self.tableList = resolve.data.data
       })
     },
+    saveRemark() {
+      let self = this
+      self.$http.put("/restaurant/setOrderReamrk", { orderId: self.$store.state.route.query.orderId, remark: self.orderRemark }).then(() => {
+        self.$notify({
+          title: '成功',
+          message: '保存备注成功',
+          type: 'success'
+        });
+      })
+    }
   },
   mounted() {
     let self = this

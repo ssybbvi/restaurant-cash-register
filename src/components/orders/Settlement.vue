@@ -9,11 +9,14 @@
         <el-form-item label="打折金额">
           <el-select v-model="discountPrice">
             <el-option v-for="item in discountPriceOptions"
-                       :key="item.value"
-                       :label="item.label"
+                       :key="item._id"
+                       :label="item.label+'('+item.value*100 +'%)'"
                        :value="item.value">
             </el-option>
           </el-select>
+          <i @click="openDiscountPriceList"
+             class="el-icon-s-tools"
+             style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
         </el-form-item>
         <el-form-item label="直减金额">
           <el-input-number v-model="cutBackPrice"
@@ -43,11 +46,8 @@
                            :min="0"></el-input-number> 找零：¥{{changePrice}}
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="remark"
-                    style="width:80%"
-                    type="textarea"
-                    :rows="2"
-                    placeholder="请输入内容"> </el-input>
+          <RemarkTextbox :reamrkType="$Enumerate.remarkType.paymentOrder"
+                         @remarkchange="setRemark"></RemarkTextbox>
         </el-form-item>
         <el-form-item label="">
           <el-button @click="returnOrderItems">返回</el-button>
@@ -56,23 +56,27 @@
         </el-form-item>
       </el-form>
     </div>
+    <discount-price-list ref="discountPriceList"
+                         @refresh="loadDiscountPriceList" />
   </div>
 </template>
 <script>
 import * as types from '@/store/mutation-types'
 import { getUserInfo } from "@/webapi/tool"
 import NP from 'number-precision'
+import RemarkTextbox from '@/components/comm/RemarkTextbox'
+import DiscountPriceList from '@/components/orders/DiscountPriceList'
 
 export default {
+  components: {
+    RemarkTextbox,
+    DiscountPriceList
+  },
   data() {
     return {
       cutBackPrice: 0,
       discountPrice: 1,
-      discountPriceOptions: [
-        { value: 1, label: "请选择打折力度" },
-        { value: 0.8, label: "8折" },
-        { value: 0.9, label: "老顾客优惠大酬宾（9折）" },
-        { value: 0.98, label: "98折" }],
+      discountPriceOptions: [],
       remark: "",
       paymentPrice: 0,
       customerPrice: 0
@@ -82,10 +86,7 @@ export default {
     totalPrice() {
       let self = this
       let orderItemTotalPrice = self.$store.state.productItems.reduce((acc, cur) => {
-        if (!cur.isGift) {
-          acc = NP.plus(acc, cur.price)
-        }
-        return acc
+        return NP.plus(acc, cur.price)
       }, 0)
       orderItemTotalPrice += NP.times(self.$store.state.currentOrder.seatPrice, self.$store.state.currentOrder.seat)
       return orderItemTotalPrice
@@ -118,7 +119,7 @@ export default {
         return acc
       }, 0)
 
-      let _suggestPaymentPrice = self.totalPrice - _totalOfferPrice
+      let _suggestPaymentPrice = NP.minus(self.totalPrice, _totalOfferPrice)
 
       let wipeZeroPrice = NP.minus(_suggestPaymentPrice, Math.floor(_suggestPaymentPrice))
       if (wipeZeroPrice > 0) {
@@ -127,7 +128,6 @@ export default {
           name: `抹零`
         })
       }
-
       return list
     },
     totalOfferPrice() {
@@ -149,6 +149,10 @@ export default {
     }
   },
   methods: {
+    setRemark(val) {
+      let self = this
+      self.remark = val
+    },
     setPaymentPriceWithCustomerPrice(_suggestPaymentPrice) {
       let self = this
       self.paymentPrice = _suggestPaymentPrice
@@ -156,13 +160,13 @@ export default {
     },
     returnOrderItems() {
       let self = this
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
+      self.$store.commit(types.SET_ORDER_MODE, self.$Enumerate.orderMode.productList)
     },
     paymentOrder() {
       let self = this
       let userInfo = getUserInfo().userInfo
 
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
+      self.$store.commit(types.SET_ORDER_MODE, self.$Enumerate.orderMode.productList)
       self.$http.post("/restaurant/paymentOrder", {
         orderId: self.$store.state.currentOrder._id,
         remark: self.remark,
@@ -181,9 +185,30 @@ export default {
         });
         self.$router.push({ name: 'tables' })
       })
+    },
+    openDiscountPriceList() {
+      let self = this
+      self.$refs.discountPriceList.dialogFormVisible = true
+    },
+    loadDiscountPriceList() {
+      let self = this
+      self.$http.get("/configs", { params: { key: 0 } }).then((resolve) => {
+        let discountPriceList = resolve.data.data && resolve.data.data.value
+        self.discountPriceOptions = [{ value: 1, label: "请选择打折力度" }]
+        discountPriceList.forEach(item => {
+          self.discountPriceOptions.push({
+            value: item.discountPrice,
+            label: item.name,
+            _id: item._id
+          })
+        })
+        self.discountPrice = 1
+      })
     }
   },
   mounted() {
+    let self = this
+    self.loadDiscountPriceList()
   }
 }
 </script>

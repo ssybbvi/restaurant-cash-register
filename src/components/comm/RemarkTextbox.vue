@@ -3,13 +3,14 @@
     <el-input type="textarea"
               :rows="2"
               placeholder="请输入内容"
-              v-model="remark"> </el-input>
+              v-model="inputRemark"> </el-input>
     <el-tag :key="item._id"
             v-for="item in remarkList"
             :closable="remarkEditMode"
             :disable-transitions="false"
             @close="handleCloseRemark(item)"
-            @click="setRemark(item.content)">
+            @click="setRemark(item.content)"
+            style="margin-right:5px">
       {{item.content}}
     </el-tag>
     <el-input v-if="remarkEditMode"
@@ -21,7 +22,6 @@
               @blur="inputConfirmRemark">
     </el-input>
     <i v-if="remarkEditMode"
-       @click="colseEditMode"
        class="el-icon-s-tools"
        style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
     <i v-if="!remarkEditMode"
@@ -33,15 +33,35 @@
 </template>
 <script>
 export default {
+  props: {
+    remark: {
+      type: String,
+      default: ""
+    },
+    reamrkType: {
+      type: Number//self.$Enumerate.remarkType.product
+    }
+  },
   data() {
     return {
       reamrkInputVisible: false,
       remakContent: "",
       remarkEditMode: false,
-      remark: "",
+      inputRemark: "",
       remarkList: []
     }
   },
+  watch: {
+    inputRemark(val) {
+      let self = this
+      self.$emit("remarkchange", val)
+    },
+    remark(val) {
+      let self = this
+      self.inputRemark = val
+    }
+  },
+
   methods: {
     openEditMode() {
       let self = this
@@ -50,21 +70,17 @@ export default {
         self.$refs.saveTagInput.$refs.input.focus();
       });
     },
-    colseEditMode() {
-      let self = this
-      self.remarkEditMode = false
-    },
     loadRmark() {
       let self = this
-      self.$http.get("/remark", { params: { type: self.$Enumerate.remarkType.product } }).then(resolve => {
+      self.$http.get("/remark", { params: { type: self.reamrkType } }).then(resolve => {
         self.remarkList = resolve.data.data
       })
     },
-    handleCloseRemark(remark) {
+    handleCloseRemark(item) {
       let self = this
       self.$http.delete("/remark", {
         params: {
-          _id: remark._id
+          _id: item._id
         }
       }).then(() => {
         self.loadRmark()
@@ -74,22 +90,23 @@ export default {
       let self = this
       let remakContent = this.remakContent;
       if (remakContent) {
-        self.$http.post("/remark", { type: self.$Enumerate.remarkType.product, content: remakContent }).then(() => {
+        self.$http.post("/remark", { type: self.reamrkType, content: remakContent }).then(() => {
           self.loadRmark()
         })
       }
-      this.reamrkInputVisible = false;
-      this.remakContent = '';
-
+      self.reamrkInputVisible = false;
+      self.remakContent = '';
+      self.remarkEditMode = false
     },
     setRemark(content) {
       let self = this
-      self.remark = self.remark + content + ' '
-    },
+      self.inputRemark = self.inputRemark + content + ' '
+    }
   },
   mounted() {
     let self = this
     self.loadRmark()
+    self.inputRemark = self.remark
   }
 }
 </script>

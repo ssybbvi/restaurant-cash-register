@@ -101,6 +101,14 @@ export default {
     },
     settlement() {
       let self = this
+      if (self.$store.state.productItems.some(e => e.status === this.$Enumerate.productStatus.normal)) {
+        self.$notify({
+          title: '错误',
+          message: '还有菜品没有下单，无法结算',
+          type: 'error'
+        });
+        return
+      }
       self.$store.commit(types.SET_ORDER_MODE, self.$Enumerate.orderMode.settlement)
     },
     selectedOrderItem(item) {

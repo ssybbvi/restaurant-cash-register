@@ -1,49 +1,7 @@
 <template>
   <el-container>
-    <el-dialog title="订单详情"
-               :visible.sync="dialogFormVisible">
-      <el-row>
-        <el-col :span="8"> 开始用餐：{{currentOrder.startDateTime|dataTime}}</el-col>
-        <el-col :span="8"> 桌号：（{{currentOrder.tableAreaName}}）{{currentOrder.tableName}}</el-col>
-        <el-col :span="8"> 结束用餐：{{currentOrder.endDateTime|dataTime}}</el-col>
-      </el-row>
-
-      <el-table :data="orderItems"
-                style="width: 100%">
-        <el-table-column prop="name"
-                         label="菜品">
-        </el-table-column>
-        <el-table-column prop="price"
-                         label="价格">
-        </el-table-column>
-      </el-table>
-      <div slot="footer"
-           class="dialog-footer">
-        <el-button type="primary"
-                   @click="dialogFormVisible=false">关 闭</el-button>
-      </div>
-    </el-dialog>
-    <!-- <el-header >
-
-      <el-form :inline="true">
-        <el-form-item label="收银员">
-          <el-select v-model="searchFrom.cashieUserId"
-                     placeholder="活动区域">
-            <el-option label="区域一"
-                       value="shanghai"></el-option>
-            <el-option label="区域二"
-                       value="beijing"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary"
-                     @click="loadOrder">查询</el-button>
-        </el-form-item>
-      </el-form>
-
-    </el-header> -->
+    <order-details ref="orderDetails" />
     <el-main>
-
       <el-table :data="orderList"
                 style="width: 100%">
         <el-table-column label="收银员"
@@ -63,7 +21,7 @@
                          width="100">
           <template slot-scope="scope">
             <el-button round
-                       @click="openDialog(scope.row)">详情</el-button>
+                       @click="selected(scope.row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -80,8 +38,12 @@
 </template>
 <script>
 
+import OrderDetails from '@/components/orders/OrderDetails'
 
 export default {
+  components: {
+    OrderDetails
+  },
   data() {
     return {
       orderList: [],
@@ -94,11 +56,16 @@ export default {
     }
   },
   methods: {
-    openDialog(row) {
+    selected(row) {
       let self = this
-      self.dialogFormVisible = true
-      self.currentOrder = row
-      self.loadOrderItems()
+      self.$refs.orderDetails.currentOrder = row
+      self.$refs.orderDetails.drawer = true
+      self.$http.get("/restaurant/getOrderItem", { params: { orderId: row._id } }).then(resolve => {
+        self.$refs.orderDetails.orderItems = resolve.data.data.map(item => {
+          item.price = "¥" + item.price
+          return item
+        })
+      })
     },
     loadOrderItems() {
       let self = this

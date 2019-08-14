@@ -23,46 +23,14 @@
         </el-form-item>
 
         <el-form-item label="备注">
-          <el-input type="textarea"
-                    :rows="2"
-                    placeholder="请输入内容"
-                    v-model="productItem.remark"> </el-input>
-        </el-form-item>
-        <el-form-item label="">
-          <el-tag :key="item._id"
-                  v-for="item in productRemark"
-                  :closable="remarkEditMode"
-                  :disable-transitions="false"
-                  @close="handleCloseRemark(item)"
-                  @click="setRemark(item.content)">
-            {{item.content}}
-          </el-tag>
-          <el-input class="input-new-tag"
-                    v-if="reamrkInputVisible"
-                    v-model="remakContent"
-                    ref="saveTagInput"
-                    size="small"
-                    @keyup.enter.native="inputConfirmRemark"
-                    @blur="inputConfirmRemark">
-          </el-input>
-          <el-button v-else
-                     v-show="remarkEditMode"
-                     class="button-new-tag"
-                     size="small"
-                     @click="showRemarkInput">创建快速备注</el-button>
-          <i v-if="remarkEditMode"
-             @click="remarkEditMode=!remarkEditMode"
-             class="el-icon-s-tools"
-             style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
-          <i v-if="!remarkEditMode"
-             @click="remarkEditMode=!remarkEditMode"
-             class="el-icon-setting"
-             style="font-size:24px;margin-left:10px;position: relative;top: 4px;"></i>
+          <RemarkTextbox :remark="productItem.remark"
+                         :reamrkType="$Enumerate.remarkType.product"
+                         @remarkchange="setRemark"></RemarkTextbox>
         </el-form-item>
         <el-form-item label="">
           <span id="quantity">
             <el-button type="primary"
-                       @click="setRemark(productItem.remark)">保存</el-button>
+                       @click="save">保存</el-button>
           </span>
         </el-form-item>
       </el-form>
@@ -73,18 +41,16 @@
 <script>
 import * as types from '@/store/mutation-types'
 import enumerate from '@/filter/enumerate'
-
+import RemarkTextbox from '@/components/comm/RemarkTextbox'
 
 export default {
   data() {
     return {
-      productRemark: [],
-      reamrkInputVisible: false,
-      remakContent: "",
-      remarkEditMode: false
+      orderItemRemark: ""
     }
   },
   components: {
+    RemarkTextbox
   },
   computed: {
     productItem() {
@@ -93,47 +59,26 @@ export default {
     }
   },
   methods: {
-    returnOrderItems() {
+    setRemark(val) {
       let self = this
-      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
+      self.orderItemRemark = val
     },
-    loadRmark() {
-      let self = this
-      self.$http.get("/remark", { params: { type: enumerate.remarkType.product } }).then(resolve => {
-        self.productRemark = resolve.data.data
-      })
-    },
-    showRemarkInput() {
-      this.reamrkInputVisible = true;
-      this.$nextTick(() => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
-    },
-    handleCloseRemark(remark) {
-      let self = this
-      self.$http.delete("/remark", {
-        data: remark._id
-      }).then(() => {
-        self.loadRmark()
-      })
-    },
-    inputConfirmRemark() {
-      let self = this
-      let remakContent = this.remakContent;
-      if (remakContent) {
-        self.$http.post("/remark", { type: enumerate.remarkType.product, content: remakContent }).then(() => {
-          self.loadRmark()
-        })
-      }
-      this.reamrkInputVisible = false;
-      this.remakContent = '';
-    },
-    setRemark(remark) {
+    save() {
       let self = this
       self.$http.put(`/restaurant/setRemarkOrderItem`, {
         orderItemId: self.productItem._id,
-        remark
+        remark: self.orderItemRemark
+      }).then(() => {
+        self.$notify({
+          title: '成功',
+          message: '保存菜品备注成功',
+          type: 'success'
+        });
       })
+    },
+    returnOrderItems() {
+      let self = this
+      self.$store.commit(types.SET_ORDER_MODE, enumerate.orderMode.productList)
     },
     giftOrderItem() {
       let self = this
@@ -166,8 +111,7 @@ export default {
     }
   },
   mounted() {
-    var self = this
-    self.loadRmark()
+
   }
 }
 </script>

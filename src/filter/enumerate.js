@@ -19,7 +19,8 @@ export default {
     },
     remarkType: {
         product: 1,
-        order: 2
+        order: 2,
+        paymentOrder: 3
     },
     orderMode: {
         productList: 1,
@@ -37,7 +38,7 @@ export default {
         waiter: 3
     },
     paymentType: {
-        paymentType: 1,
+        cash: 1,
         weixin: 2,
         zhifupay: 3
     }

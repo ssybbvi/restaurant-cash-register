@@ -41,6 +41,7 @@ export default {
   methods: {
     selectedProduct(product) {
       let self = this
+      self.$store.commit(types.SET_ORDER_TABLE_MODE, self.$Enumerate.orderTableMode.orderItemList)
       let orderId = self.$store.state.route.query.orderId
       self.$http.post("/restaurant/insertOrderItem", {
         orderId: orderId,
